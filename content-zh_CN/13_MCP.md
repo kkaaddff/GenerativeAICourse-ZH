@@ -1,61 +1,60 @@
-# MCP (Model Context Protocol)
+# MCP (模型上下文协议)
 
-## The Problem: Why We Need Decoupling in AI
+## 问题所在：为何AI需要解耦？
 
-In software development, we've always decoupled systems to make them more flexible and maintainable — this is nothing new.
+在软件开发中，为了使系统更加灵活和易于维护，我们总是会对其进行**解耦（Decoupling）**——这并非什么新概念。
 
-Web frontends like LinkedIn don't talk directly to the database — they talk to an API server that decouples the application from the data it interacts with. That API server exposes data from these databases in a standardized way (usually JSON over HTTP), which makes the system easier to scale. For example, if the database schema changes, the frontend doesn't break — only the API needs to adapt.
+例如，像领英（LinkedIn）这样的Web前端，并不会直接与数据库对话，而是通过一个**API服务器**进行交互。这个API服务器将应用程序与它所操作的数据解耦开来。它以一种标准化的方式（通常是基于HTTP的JSON格式）暴露来自数据库的数据，从而使整个系统更易于扩展。举个例子，如果数据库的表结构发生了变化，前端应用不会因此崩溃——只需要调整API服务器的适配逻辑即可。
 
-## What is MCP?
+## 什么是MCP？
 
-MCP is a communication protocol that standardizes how your AI applications interact with external tools and data sources. Just as web applications evolved from directly querying databases to using API layers for better scalability and maintainability, AI agents need the same architectural decoupling.
+**MCP（Model Context Protocol，模型上下文协议）** 是一种通信协议，它旨在**标准化你的AI应用与外部工具和数据源的交互方式**。正如Web应用从直接查询数据库演进到使用API层以获得更好的可扩展性和可维护性一样，AI智能体也需要同样的架构解耦。
 
 ![image](https://github.com/user-attachments/assets/79418695-3d5c-4082-ad40-0eda2ea8013a)
 
+## 变化之前与之后
 
-## The Before and After
+### MCP之前：紧密耦合的噩梦
 
-### Before MCP: Tightly Coupled Nightmare
+在MCP出现之前，构建一个需要使用多种工具的AI智能体，意味着要为每个工具编写定制化的集成代码。每个工具都有其独特的认证方法、错误处理机制、数据格式和API调用方式。这造成了一场维护上的噩梦：
 
-Before MCP, building an AI agent with multiple tools meant writing custom integrations for each tool. Each requiring its own authentication method, error handling, data format, and API calls. This created a maintenance nightmare:
+-   当Slack更新其API时，你必须修改你的智能体代码。
+-   当你想添加一个新的CRM集成时，你必须重新部署整个应用程序。
+-   应用程序与其使用的每一个工具都**紧密耦合**在一起。
 
-- When Slack updated their API, you had to modify your agent code
-- When you want to add a new CRM integration, you had to redeploy your entire application
-- The application is tightly coupled to every tool it used
+### MCP之后：标准化的通信层
 
-### After MCP: Standardized Communication Layer
+MCP在AI应用和工具之间引入了一个**标准化的通信层**，其架构模式与API服务器在Web前端和数据库之间扮演的角色如出一辙。你的智能体不再需要理解如何与每一个单独的工具对话，它只需要与一个**MCP服务器**通信即可。这个MCP服务器作为一个抽象层，暴露了所有可用的工具。
 
-MCP introduced a standardized communication layer between AI applications and tools following the same architectural pattern that API servers provide between web frontends and databases. Instead of your agent needing to understand how to talk to each individual tool, it only needs to communicate with an MCP server that acts as an abstraction layer which exposes all available tools.
+当某个工具的API发生变化时，**只需要更新MCP服务器**——你的AI智能体代码则保持原封不动。
 
-When a tool's API changes, only the MCP server needs updating — your AI agent code remains untouched.
+## 架构对比
 
-## Architectural Comparison
-
-### Traditional Web Development
+### 传统Web开发
 ```
-Frontend ↔ Database (tightly coupled, fragile)
-Frontend ↔ API Server ↔ Database (decoupled, flexible)
-```
-
-### AI Agent Development
-```
-Agent ↔ Tools (tightly coupled, fragile)
-Agent ↔ MCP Server ↔ Tools (decoupled, flexible)
+前端 ↔ 数据库 (紧密耦合, 脆弱)
+前端 ↔ API服务器 ↔ 数据库 (解耦, 灵活)
 ```
 
-## MCP: The REST API for AI Tools
+### AI智能体开发
+```
+智能体 ↔ 多个工具 (紧密耦合, 脆弱)
+智能体 ↔ MCP服务器 ↔ 多个工具 (解耦, 灵活)
+```
 
-MCP for AI is like REST APIs for AI tools. It provides the same standardization and decoupling benefits that web APIs brought to web development. But not only that, it enables effortless integration with external tools because anyone can expose their functionality through an MCP server and you simply connect to it.
+## MCP：AI工具的REST API
 
-Just like REST APIs created an ecosystem where services like Stripe, Twilio, and Google Maps could expose their capabilities for any web application to consume, MCP creates an ecosystem where any service provider can expose their tools for any AI agent to use. These service providers simply publish MCP servers that expose their capabilities — all you have to do is just connect to these servers.
+可以把MCP理解为**专为AI工具设计的REST API**。它提供了与Web API为Web开发带来的相同的标准化和解耦优势。不仅如此，它还使得与外部工具的集成变得毫不费力，因为任何人都可以通过一个MCP服务器来暴露其功能，而你只需连接到它即可。
 
-## The Ecosystem Effect
+正如REST API创造了一个生态系统，使得像Stripe（支付）、Twilio（通信）和谷歌地图这样的服务能够将其能力暴露给任何Web应用来使用一样，MCP也正在创造一个生态系统，使得任何服务提供商都能将其工具暴露给任何AI智能体来使用。这些服务提供商只需发布一个实现了其能力的MCP服务器，而你所要做的，仅仅是连接到这些服务器。
 
-The power of MCP lies in creating a standardized ecosystem:
+## 生态系统效应
 
-- **Service providers** can build once and expose their capabilities to all AI agents
-- **AI developers** can integrate with dozens of tools without writing custom code for each
-- **Maintenance** becomes centralized — when APIs change, only the MCP server needs updates
-- **Innovation** accelerates as new tools can be immediately available to all AI agents through MCP
+MCP的力量在于创建一个标准化的生态系统：
 
-This is the same network effect that made REST APIs so powerful for web development, now applied to AI agent development.
+-   **服务提供商**可以“一次构建，处处使用”，将其能力暴露给所有的AI智能体。
+-   **AI开发者**可以集成数十种工具，而无需为每一种都编写定制代码。
+-   **维护**变得集中化——当API发生变化时，只需要更新MCP服务器。
+-   **创新**得以加速，因为新的工具可以通过MCP立即被所有AI智能体所用。
+
+这与当年使REST API在Web开发领域如此强大的**网络效应**如出一辙，如今正被应用于AI智能体的开发之中。

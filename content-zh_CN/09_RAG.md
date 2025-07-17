@@ -1,132 +1,109 @@
-# RAG (Retrieval Augmented Generation)
+# RAG：检索增强生成
 
-## The Problem RAG Solves
+## RAG解决的核心问题
 
-AI models are trained on public data up to a specific cutoff date. They cannot access information beyond what they were trained on — this includes your private company data, recent information beyond their training cutoff, or any specialized knowledge not in their training dataset.
+AI模型（尤其是大语言模型）的知识受限于其训练数据，这些数据通常是截至某个特定日期的公开信息。这意味着它们无法访问超出该范围的知识，包括：
+-   你的公司内部私有数据。
+-   训练截止日期之后发生的最新事件。
+-   任何未包含在其训练集中的专业领域知识。
 
-The question is: how can we leverage the AI model's reasoning capabilities on data it wasn't trained on? For example, helping customers find products in your catalog, or reasoning about your company's internal documents.
+那么问题来了：**我们如何才能利用AI模型的强大推理能力，来处理它从未“学习”过的数据？** 例如，帮助客户在你的产品目录中找到商品，或者让模型理解并分析你公司的内部政策文档。
 
-## How RAG Works
+## RAG的工作原理
 
-What we do is turn these private documents into smaller chunks (more on that later), use an embedding AI model to turn these chunks into vectors (a series of numbers that capture sentiment and meaning of these chunks), we store these vector chunks in a vector database. Then when the user asks a question about these private documents (such as: "Recommend me products for hiking Mount Everest"), we turn the user question into vectors (again capturing the question's sentiment and meaning), compare that vector with the vectors stored in our vector database, and then finally feed the model both the user question and the returned chunked vector (from the vector comparison).
+**检索增强生成（Retrieval Augmented Generation, RAG）** 正是解决这一问题的关键技术。其工作流程如下：
+
+1.  **数据预处理（索引阶段）**:
+    -   **分块 (Chunking)**: 我们首先将私有文档（如产品手册、政策文件）分割成更小的、有意义的文本块（Chunks）。
+    -   **向量化 (Embedding)**: 使用一个专门的**嵌入模型（Embedding Model）**，将每个文本块转换成一个向量（Vector）。向量是一系列数字，能够捕捉文本块的语义和含义。
+    -   **存储 (Storing)**: 将这些文本块的向量形式存储在一个**向量数据库（Vector Database）** 中。这个数据库专门用于高效地存储和检索向量。
+
+2.  **查询与生成（检索阶段）**:
+    -   当用户提出一个与这些私有文档相关的问题时（例如：“推荐几款适合攀登珠穆朗玛峰的徒步产品”），我们同样使用嵌入模型将用户的问题转换成一个查询向量。
+    -   **语义搜索 (Semantic Search)**: 我们将这个查询向量与向量数据库中存储的所有文本块向量进行比较，找出在语义上最相似、最相关的几个文本块。
+    -   **增强提示 (Augmented Prompt)**: 最后，我们将原始的用户问题和从数据库中检索到的相关文本块组合成一个新的、增强的提示（Prompt），并将其一同发送给大语言模型。
+    -   **生成答案 (Generation)**: 模型会基于我们提供的上下文信息（即检索到的文本块）来生成精准的回答。
 
 ![image](https://github.com/user-attachments/assets/567589c9-4282-4a86-86d5-d9ea098e909f)
 
+**从第一性原理出发：RAG的本质就是构建一个信息检索系统来辅助语言模型。当用户提问时，我们先将问题“翻译”成机器能理解的数学语言（向量），用它在我们的知识库（向量数据库）中找到最相关的资料，然后把这些资料连同问题一起交给模型，让它“开卷考试”。就这么简单。**
 
-**So from first principles: RAG is literally building a function, where when user asks a question, we turn the question into vectors, compare it with vectors in our vector database, then once we find the relevant vectors, we add it to the question with the prompt. It is that simple.**
+## 为什么需要分块？
 
-## Why Chunking is Necessary
+对文档进行分块处理至关重要，主要原因有二：
 
-The reason why data is chunked is because of context window. There is a limitation on the context window, and if the data exceeds that, which in most cases it will, then we divide it into chunks. Vector searches also work better on focused information. Note that when we say vector search, we typically mean semantic word search, rather than traditional keyword search.
+1.  **上下文窗口限制**: 每个语言模型都有其能一次性处理的文本长度上限（即上下文窗口）。如果原始文档过长，超出此限制，模型将无法处理。分块能确保提供给模型的信息量在其可接受范围内。
+2.  **提高检索精度**: 向量搜索在处理更小、更聚焦的信息单元时效果更好。相比于在一个包含多种主题的长文档中进行模糊搜索，在一个只讨论单一主题的短文本块中进行搜索，更容易找到精确匹配。值得注意的是，我们这里所说的向量搜索，通常指**语义搜索**，它理解词语的含义，而非传统的**关键词搜索**。
 
-## Search Types: Vector vs. Keyword vs. Hybrid
+## 搜索类型：向量、关键词与混合搜索
 
-**Vector search** is great, but might miss exact keyword matches (might be too smart and return related but not precisely matching content).
+-   **向量搜索**: 擅长理解语义和上下文，能找到意思相近但用词不同的内容。但它可能因为“过于智能”而错过一些精确的关键词匹配，返回相关但不完全精确的内容。
+-   **关键词搜索**: 非常适合查找包含特定关键词的精确匹配。但它无法理解同义词或语义上的关联。
+-   **混合搜索 (Hybrid Search)**: 这是目前业界普遍采用的方案。它结合了向量搜索和关键词搜索的优点，通过综合两者的得分对文档进行重新排序，从而获得最佳的整体检索质量，真正做到两全其美。
 
-**Keyword search** is great for exact keyword matching. Of course, it can't understand semantic relationships.
+关于分块，实际上存在多种**分块策略**来确定最合适的文本块大小。这是一个需要权衡的决策：如果块太小，可能会丢失重要的上下文信息；如果块太大，又可能会稀释核心信息，引入不必要的噪声。
 
-This is why **Hybrid search** is common — it combines both techniques to get better overall retrieval quality. Documents are reranked by combined scores, giving you the best of both worlds.
+一些先进的向量数据库服务（如Azure AI Search）可以为我们自动处理分块过程。在本课程的示例中，我们将通过代码手动实现这一过程。
 
-There are actually chunking strategies to determine the most appropriate size of the chunk. There is a tradeoff: if it is too small it will lack context, but if it is too large it will dilute relevant information.
+## RAG索引：高质量响应的基础
 
-Some vector databases, like Azure AI Search as an example, handle the chunking for us. We'll do it with code in this example.
+你的RAG系统质量，在很大程度上取决于你如何**索引（Indexing）** 你的数据。
 
-## RAG Indexing: The Foundation of Quality
+### 什么是索引？
 
-The quality of your RAG system depends on how you index your data.
+当你拥有大量数据时，快速从中找到所需信息是一个挑战。最直接的方法是线性搜索（即逐一检查每条数据），但在大规模数据下，这种方法会变得极其缓慢。
 
-### What Indexing Is
+**索引**通过创建一个独立的数据结构，将可搜索的条件（如关键词、向量）映射到数据在存储中的实际位置。这样，我们无需扫描全部数据，而是先查询这个高效的索引，快速定位到相关数据，然后只检索这些部分。
 
-When you have a large collection of data, searching for it can be a challenge. The most straightforward way is to use linear search, but at scale, this becomes too slow.
+### 现实世界中的例子：制药公司
 
-Indexing creates a separate data structure that maps a searchable criteria to the location of the data. So instead of scanning all data, we scan the index first to identify where the relevant data is stored and retrieve only these pieces.
-
-### Real-World Example: Pharmaceutical Company
-
-For example, a pharmaceutical company creates an index mapping:
+一家制药公司可以创建一个索引，将关键概念映射到相关文档：
 
 ```
-"drug_interactions" → [doc_3, doc_127, doc_2891, doc_5643, doc_8901]
-"clinical_trials" → [doc_45, doc_298, doc_3372, doc_7123]  
-"adverse_reactions" → [doc_12, doc_567, doc_4321, doc_9876]
-"pharmacokinetics" → [doc_78, doc_1456, doc_6789]
+"药物相互作用" → [文档3, 文档127, 文档2891, ...]
+"临床试验"     → [文档45, 文档298, 文档3372, ...]
+"不良反应"     → [文档12, 文档567, 文档4321, ...]
 ```
 
-Then when a scientist searches for drug interactions, it checks the index, and only retrieves the relevant documents as opposed to searching for all of them.
+当科学家搜索“药物相互作用”时，系统会先查询索引，然后只检索索引指向的少数几个相关文档，而不是搜索公司所有的文档库。
 
-### Database Indexing Example
+### RAG中的索引
 
-In relational databases as an example, you can create an index which maps column values (like salary, name, address) to row locations (actual values).
+在RAG的上下文中，索引的作用与传统数据库类似。在关系型数据库中，我们使用索引来避免全表扫描；在RAG系统中，我们使用**向量数据库索引**来避免将用户查询与知识库中的每一个文本块进行比较。
 
-Let's say you have a table with 50,000 employee staff records:
+在RAG系统中，**索引的质量直接影响AI能否找到正确的信息来回答问题**。糟糕的索引意味着AI会得到不相关或不完整的上下文，从而导致错误或无用的响应。
 
-```sql
-CREATE TABLE employees (
-    emp_id INT,
-    last_name VARCHAR(100),
-    department VARCHAR(50),
-    hire_date DATE,
-    salary DECIMAL(10,2)
-);
-```
+## RAG索引的三个关键层面
 
-You can create an index on the last name:
+### 1. 文档分块 (Document Chunking)
 
-```sql
-CREATE INDEX idx_last_name ON employees(last_name);
-```
+你如何组织数据是第一步。你可以简单地按字符数限制来切分，但这很可能切断句子，破坏上下文。因此，更推荐使用**语义分块（Semantic Chunking）**，这种方法会利用语言模型来识别句子和段落的边界，确保切分出的文本块在语义上是完整的。
 
-This then creates a separate data structure that looks like this:
+### 2. 向量嵌入 (Vector Embedding)
 
-**Index Structure (idx_last_name):**
-```
-"Adams" → Row 15,847
-"Brown" → Row 2,156
-"Chen" → Row 41,923
-"Davis" → Row 8,901
-"Evans" → Row 33,412
-... (sorted alphabetically)
-"Wilson" → Row 7,234
-"Young" → Row 28,567
-```
+这是将文本转换为数字的过程。使用通用的嵌入模型可能会在专业领域导致检索效果不佳（例如，在法律文件中，“IP”可能无法被准确理解为“知识产权”）。因此，使用在特定领域数据上**微调过的嵌入模型**，通常能带来更好的结果。
 
-Now, when you search for Adams last name as an example, you can quickly retrieve it.
+### 3. 向量数据库索引 (Vector Database Indexing)
 
-### RAG Indexing Context
+在向量数据库内部，也需要构建索引来加速搜索。**HNSW (Hierarchical Navigable Small World)** 是目前业界公认的、用于近似最近邻搜索的黄金标准算法，它在速度和精度之间取得了出色的平衡。
 
-In the context of RAG, like in a relational database where we use indexes to avoid scanning every row, RAG systems use vector database indexes to avoid comparing your query against every single document chunk.
+## 相关性与质量控制
 
-In RAG systems, indexing quality affects whether your AI finds the right information to answer questions. Poor indexing means the AI gets irrelevant or incomplete context which leads to wrong or useless responses.
+需要注意的是，并非所有搜索结果都与用户查询相关。你需要定义什么才算是“相关内容”。
 
-## RAG Indexing: 3 Critical Layers
+在向量搜索中，我们可以设置一个**相关性阈值（Relevance Threshold）**。这是一个分数，只有相似度得分高于此阈值的文本块才会被返回。
+-   如果阈值设得**太高**，可能会错过一些有用的信息，但这在要求高精度的场景中（例如，错误信息可能导致高昂代价的金融或医疗领域）是有价值的。
+-   如果阈值设得**太低**，可能会引入过多不相关的上下文，从而“迷惑”模型，降低最终答案的质量。
 
-### 1. Document Chunking
+你需要通过**评估**来找到最佳阈值，例如通过测量用户的满意度，或者分析检索到的文本块与用户问题的实际相关度。
 
-How do you actually organize the data. You can do it by character limit, but that means you will most likely miss some context or critical information. Hence why semantic chunking is used as illustrated before. These semantic splitters use language models.
+## 生产环境中的考量
 
-### 2. Vector Embedding (Converting Text to Numbers)
+### 数据管道的挑战
+-   你的知识库多久更新一次？需要建立自动化的数据同步流程。
+-   如何确保进入系统的数据是干净和准确的？需要数据清洗和验证环节。
+-   如何管理文档的版本？需要处理文档的更新和删除，并确保索引同步。
 
-Generic embedding can retrieve bad results (for instance, "IP" in legal might not be understood as intellectual property). Domain-specific embeddings lead to better results, so like fine-tuned embedding model on company data.
-
-### 3. Vector Database Indexing
-
-HNSW is the industry standard.
-
-## Relevance and Quality Control
-
-One thing to note is that not all search results are actually relevant. You need to determine what constitutes relevant content.
-
-There is a **relevance threshold** that you put for vector searches. If you put it too high (0.0) then it might miss some content but it is valuable in high precision scenarios where wrong info could be costly. If it is too low, it might include irrelevant context that confuses the model. You need a way to measure this as well.
-
-**User satisfaction:** Are users getting useful information? How often are retrieved chunks actually relevant?
-
-## Production Considerations
-
-### Data Pipeline Challenges
-- How often does your knowledge base change?
-- Ensuring clean and accurate data enters the system
-- Version management (handling document updates and deletions)
-
-### Governance
-- How long to keep search logs & user queries
-- Track who searched what and when
+### 治理与合规
+-   搜索日志和用户查询需要保留多久？
+-   需要追踪谁在何时搜索了什么内容，以满足审计和合规要求。

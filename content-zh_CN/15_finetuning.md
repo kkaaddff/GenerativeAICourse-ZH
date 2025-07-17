@@ -1,105 +1,97 @@
-# Fine-Tuning
+# 模型微调 (Fine-Tuning)
 
-## The Fundamental Difference
+## 根本区别
 
-Prompt-based methods adapt the model by giving it instructions, but fine-tuning adapts the model by adjusting its weights or parameters.
+基于**提示（Prompt）** 的方法是通过**给出指令**来适配模型，而**微调（Fine-Tuning）** 则是通过**调整模型内部的权重或参数**来适配模型。
 
-It is usually used for domain-specific capabilities like coding or medical applications.
+微调通常用于培养模型在特定领域的专业能力，如编程或医疗应用。
 
-Although fine-tuning is powerful, it can be expensive and challenging.
+尽管微调功能强大，但它也可能成本高昂且充满挑战。
 
 ![image](https://github.com/user-attachments/assets/a5c5a9e8-820c-4173-9bec-eedb36987f8f)
 
+## 微调为何有效？
 
-## Why Fine-Tuning Works
+在实践中，大多数人通常会选择微调**较小的模型**，因为它们需要更少的计算资源（如内存）。一个经过精心微调的小模型，在特定任务上的表现，甚至可能超越一个未经优化的、规模大得多的通用模型。
 
-In practice, most people usually fine-tune smaller models because they require less memory. A small model, fine-tuned on a specific task, might outperform a much larger out-of-the-box model on that task.
+微调面临的主要挑战是**获取高质量的标注数据**，这个过程可能非常缓慢且昂贵，尤其是在专业领域。有些人会依赖合成数据或由AI生成的数据，但其有效性差异很大，需要谨慎评估。
 
-The main challenge with fine-tuning is acquiring annotated data, which can be slow and expensive to acquire, especially for domain-specific areas. Some people rely on synthetic or AI-generated data, but their effectiveness is highly variable.
+**重要原则：在考虑微调之前，你应该始终先进行彻底的、严谨的提示工程实验。** 很多时候，优化提示就足以达到你的目标。
 
-**You should always start with rigorous prompt experiments before even thinking about fine-tuning.**
+## 微调的策略
 
-## Fine-Tuning Tactics
+尽管围绕微调的许多决策——如何决定是否微调、如何获取数据、如何维护微调后的模型——都相当困难，但微调的实际执行过程相对直接。你需要做出三个关键选择：**基础模型**、**微调方法**和**微调框架**。
 
-While many things around fine-tuning - deciding whether to fine-tune, acquiring data, and maintaining fine-tuned models - are hard, the actual process of fine-tuning is more straightforward. There are three things you need to choose: a base model, a fine-tuning method, and a framework for fine-tuning.
+### 基础模型：起点至关重要
 
-### Base Models: Starting Points Matter
+在AI项目的初期，当你还在探索任务可行性时，从你能负担得起的**最强大的模型**开始是明智的。如果连最强的模型都难以产生好的结果，那么更弱的模型很可能表现更差。反之，如果最强的模型满足了你的需求，你就可以将其作为性能基准，去探索使用更经济的模型能否达到类似的效果。
 
-At the beginning of an AI project, when you're still exploring the feasibility of your task, it's useful to start with the most powerful model you can afford. If this model struggles to produce good results, weaker models are likely to perform even worse. If the strongest model meets your needs, you can then explore weaker models, using the initial model as a benchmark for comparison.
+对于微调，不同的项目有不同的发展路径：
 
-For fine-tuning, the starting models vary for different projects. There are two main development paths:
+#### 渐进路径 (The Progression Path)
+1.  **测试代码**：使用最便宜、最快的模型来测试你的微调代码，确保整个流程能顺利运行。
+2.  **测试数据**：使用一个中等规模的模型来微调，观察训练损失（Training Loss）是否随着数据的增加而下降。如果损失不降，说明你的数据或设置可能有问题。
+3.  **性能实验**：使用最好的模型进行实验，看看你能将性能推向多高的水平。
+4.  **绘制性价比曲线**：一旦你取得了不错的结果，可以用所有候选模型都进行一次训练，从而绘制出一条价格/性能曲线，并据此选择最适合你业务需求的模型。
 
-#### The Progression Path
-1. **Test your fine-tuning code** using the cheapest and fastest model to make sure the code works as expected
-2. **Test your data** by fine-tuning a middling model. If the training loss doesn't go down with more data, something might be wrong
-3. **Run experiments** with the best model to see how far you can push performance
-4. **Map the frontier:** Once you have good results, do a training run with all models to map out the price/performance frontier and select the model that makes the most sense for your use case
+#### 蒸馏路径 (The Distillation Path)
+1.  **从强者开始**：用一个较小的数据集和你所能负担得起的最强模型开始。用这个小数据集训练出最好的模型。因为基础模型本身很强大，所以它需要的数据量相对较少就能达到很好的性能。
+2.  **生成更多数据**：使用这个微调好的强大模型来生成更多的、高质量的训练数据（这被称为“数据蒸馏”）。
+3.  **训练更经济的模型**：使用这个新生成的、更大规模的数据集来训练一个更便宜、更小的模型。
 
-#### The Distillation Path
-1. **Start strong:** Begin with a small dataset and the strongest model you can afford. Train the best possible model with this small dataset. Because the base model is already strong, it requires less data to achieve good performance
-2. **Generate more data:** Use this fine-tuned model to generate more training data
-3. **Train cheaper:** Use this new dataset to train a cheaper model
+因为微调通常是在提示工程实验之后进行的，所以到你开始微调时，理想情况下，你应该已经对不同模型的行为有了很好的理解。你应该基于这种理解来规划你的微调发展路径。
 
-Because fine-tuning usually comes after experiments with prompt engineering, by the time you start to fine-tune, ideally, you should have a pretty good understanding of different models' behaviors. You should plan your fine-tuning development path based on this understanding.
+### 微调方法：全量微调 vs. 高效微调技术
 
-### Fine-Tuning Methods: Full vs. Adapter Techniques
+目前主流的微调方法分为两大类：
 
-Adapter techniques like LoRA are cost-effective but typically don't deliver the same level of performance as full fine-tuning. If you're just starting with fine-tuning, try something like LoRA, and attempt full fine-tuning later.
+-   **全量微调 (Full Fine-Tuning)**: 调整模型的所有参数。效果最好，但计算成本和资源需求也最高。
+-   **参数高效微调 (Parameter-Efficient Fine-Tuning, PEFT)**: 只调整模型参数的一小部分。这类技术（如 **LoRA**）成本效益高，但性能通常略逊于全量微调。
 
-The fine-tuning methods to use also depend on your data volume. Depending on the base model and the task, full fine-tuning typically requires at least thousands of examples and often many more. PEFT (Parameter Efficient Fine-Tuning) methods, however, can show good performance with a much smaller dataset. If you have a small dataset, such as a few hundred examples, full fine-tuning might not outperform LoRA.
+**选择建议：**
+-   如果你刚开始接触微调，可以先尝试像 **LoRA** 这样的PEFT方法。如果效果不理想，再考虑进行全量微调。
+-   你的选择也取决于**数据量**。全量微调通常需要至少数千甚至更多的样本。而PEFT方法在几百个样本的小数据集上就可能展现出良好的性能。如果你的数据集很小，全量微调的效果甚至可能不如LoRA。
+-   考虑你**需要多少个微调模型**以及你打算如何**部署它们**。像LoRA这样的适配器（Adapter）技术，允许你在同一个基础模型之上，高效地服务多个不同的微调版本。你只需要部署一个完整的模型和多个轻量级的适配器文件。而全量微调则需要为每个版本都部署一个完整的、庞大的模型。
 
-Take into account how many fine-tuned models you need and how you want to serve them when deciding on a fine-tuning method. Adapter-based methods like LoRA allow you to more efficiently serve multiple models that share the same base model. With LoRA, you only need to serve a single full model, whereas full fine-tuning requires serving multiple full models.
+### 微调框架：API vs. 自定义方案
 
-### Fine-Tuning Frameworks: APIs vs. Custom Solutions
+-   **微调API**: 这是最简单的微调方式。你只需上传数据，选择一个基础模型，然后API就会返回一个微调好的模型。模型提供商、云服务商和第三方平台都可能提供此类API。
+    -   **局限性**: 你受限于API支持的基础模型；API可能不会暴露所有可用于优化性能的超参数。
+    -   **适用场景**: 追求快速、简便的用户。
 
-**Fine-tuning APIs** are the easiest way to fine-tune. You upload data, select a base model, and get back a fine-tuned model. Like model inference APIs, fine-tuning APIs can be provided by model providers, cloud service providers, and third-party providers. 
+-   **自定义框架**: 这种方式给予你最大的灵活性。你可以使用像 **LLaMA-Factory、unsloth、PEFT (Hugging Face)、Axolotl、LitGPT** 等开源框架进行微调。它们支持广泛的微调方法，尤其是PEFT技术。如果你想进行全量微调，许多基础模型的开发者也在GitHub上提供了开源的训练代码，你可以克隆下来用自己的数据运行。
+    -   **挑战**: 你需要自己配置和管理所需的计算资源。对于PEFT，一块中端GPU可能就足够了。但对于全量微调，你可能需要更强大的算力，或者选择一个能与你的云提供商无缝集成的框架。
+    -   **分布式训练**: 如果需要在多台机器上进行微调，你需要一个支持分布式训练的框架，如 **DeepSpeed、PyTorch Distributed** 或 **ColossalAI**。
 
-Limitations of this approach:
-- You're limited to the base models that the API supports
-- The API might not expose all the knobs you can use for optimal fine-tuning performance
+## 微调超参数
 
-Fine-tuning APIs are suitable for those who want something quick and easy, but they might be frustrating for those who want more customization.
+有许多超参数可以调整以提高微调效率。以下是最重要的几个：
 
-**Custom frameworks** give you more flexibility. You can fine-tune using frameworks like LLaMA-Factory, unsloth, PEFT, Axolotl, and LitGPT. They support a wide range of fine-tuning methods, especially adapter-based techniques. If you want to do full fine-tuning, many base models provide their open source training code on GitHub that you can clone and run with your own data.
+### 学习率 (Learning Rate): 步长问题
 
-Doing your own fine-tuning gives you more flexibility, but you'll have to provision the necessary compute. If you do only adapter-based techniques, a mid-tier GPU might suffice for most models. If you need more compute, you can choose a framework that integrates seamlessly with your cloud provider.
+学习率决定了模型参数在每个学习步骤中更新的幅度。如果把学习过程想象成下山，学习率就是你每一步迈出的大小。步子太小，下山会很慢；步子太大，可能会直接跨过山谷，导致模型永远无法收敛到最佳点。
 
-To fine-tune a model using more than one machine, you'll need a framework that helps you do distributed training, such as DeepSpeed, PyTorch Distributed, and ColossalAI.
+-   **范围**: 不存在一个通用的最佳学习率。你需要在 `1e-7` 到 `1e-3` 的范围内进行实验。
+-   **实践**: 一个常见的做法是，将模型预训练结束时的学习率乘以一个0.1到1之间的常数作为微调的初始学习率。
+-   **观察损失曲线**: 如果损失曲线剧烈波动，说明学习率可能太高。如果损失曲线平稳但下降缓慢，说明学习率可能太小。你应该在保持损失曲线稳定的前提下，尽可能提高学习率。
+-   **学习率调度器 (Learning Rate Schedules)**: 你可以在训练过程中动态调整学习率，例如开始时使用较大的学习率，接近结束时使用较小的学习率。
 
-## Fine-Tuning Hyperparameters
+### 批次大小 (Batch Size): 内存与稳定性的权衡
 
-Depending on the base model and the fine-tuning method, there are many hyperparameters you can tune to improve fine-tuning efficiency. Here are the most important ones:
+批次大小决定了模型在每次更新权重时，同时“看”多少个训练样本。过小的批次（如少于8）可能导致训练不稳定。较大的批次有助于综合来自不同样本的信号，使权重更新更稳定可靠。
 
-### Learning Rate: The Step Size Problem
+-   **权衡**: 批次越大，模型遍历训练数据的速度越快，但所需的内存也越多。因此，批次大小受限于你的硬件。
+-   **梯度累积 (Gradient Accumulation)**: 当硬件内存有限，只能使用小批次时，为避免不稳定的更新，你可以累积多个小批次的梯度，然后一次性更新模型权重。这在效果上等同于使用了一个更大的批次。
 
-The learning rate determines how fast the model's parameters should change with each learning step. If you think of learning as finding a path toward a goal, the learning rate is the step size. If the step size is too small, it might take too long to get to the goal. If the step size is too big, you might overstep the goal, and the model might never converge.
+### 训练轮数 (Number of Epochs): 每个样本看几次
 
-A universal optimal learning rate doesn't exist. You'll have to experiment with different learning rates, typically between the range of 1e-7 to 1e-3, to see which one works best. A common practice is to take the learning rate at the end of the pre-training phase and multiply it with a constant between 0.1 and 1.
+一轮（Epoch）指模型完整地看过一次所有训练数据。训练轮数决定了每个训练样本被学习的次数。
 
-**Reading the loss curve:** If the loss curve fluctuates a lot, it's likely that the learning rate is too big. If the loss curve is stable but takes a long time to decrease, the learning rate is likely too small. Increase the learning rate as high as the loss curve remains stable.
+-   **数据量**: 小数据集可能需要更多的轮数。对于有数百万样本的数据集，1-2轮可能就足够了。而对于只有数千样本的数据集，可能在4-10轮后性能仍在提升。
+-   **观察损失曲线**: 如果**训练损失**和**验证损失**都在稳步下降，说明模型还能从更多的训练中受益。如果训练损失仍在下降，但**验证损失开始上升**，说明模型正在**过拟合**，你应该减少训练轮数。
 
-You can vary learning rates during the training process using **learning rate schedules** — algorithms that determine how learning rates should change throughout the training process (larger learning rates in the beginning, smaller near the end).
+### 提示损失权重 (Prompt Loss Weight): 从指令中学还是从回答中学？
 
-### Batch Size: Memory vs. Stability Trade-off
+在指令微调中，每个样本都包含一个**提示（Prompt）**和一个**回答（Response）**。在训练时，两者都可以为模型的损失计算做出贡献。但在推理时，提示通常由用户提供，模型只需要生成回答。因此，理论上，**回答部分的词元（tokens）对损失的贡献应该比提示部分的词元更重要**。
 
-The batch size determines how many examples a model learns from in each step to update its weights. A batch size that is too small, such as fewer than eight, can lead to unstable training. A larger batch size helps aggregate the signals from different examples, resulting in more stable and reliable updates.
-
-In general, the larger the batch size, the faster the model can go through training examples. However, the larger the batch size, the more memory is needed to run your model. Thus, batch size is limited by the hardware you use.
-
-This is where you see the cost versus efficiency trade-off. More expensive compute allows faster fine-tuning.
-
-**Gradient accumulation:** As of this writing, compute is still a bottleneck for fine-tuning. Often, models are so large, and memory is so constrained, that only small batch sizes can be used. This can lead to unstable model weight updates. To address this, instead of updating the model weights after each batch, you can accumulate gradients across several batches and update the model weights once enough reliable gradients are accumulated.
-
-### Number of Epochs: How Many Times to See Each Example
-
-An epoch is a pass over the training data. The number of epochs determines how many times each training example is trained on.
-
-Small datasets may need more epochs than large datasets. For a dataset with millions of examples, 1–2 epochs might be sufficient. A dataset with thousands of examples might still see performance improvement after 4–10 epochs.
-
-**Using loss curves to guide epochs:** If both the training loss and the validation loss still steadily decrease, the model can benefit from more epochs (and more data). If the training loss still decreases but the validation loss increases, the model is overfitting to the training data, and you might try lowering the number of epochs.
-
-### Prompt Loss Weight: Learning From Instructions vs. Responses
-
-For instruction fine-tuning, each example consists of a prompt and a response, both of which can contribute to the model's loss during training. During inference, however, prompts are usually provided by users, and the model only needs to generate responses. Therefore, response tokens should contribute more to the model's loss during training than prompt tokens.
-
-The prompt loss weight determines how much prompts should contribute to this loss compared to responses. If this weight is 100%, prompts contribute to the loss as much as responses, meaning that the model learns equally from both. If this weight is 0%, the model learns only from responses. Typically, this weight is set to 10% by default, meaning that the model should learn some from prompts but mostly from responses.
+提示损失权重这个参数，就决定了提示对总损失的贡献程度。如果权重是100%，模型从提示和回答中学到的东西一样多。如果权重是0%，模型只从回答中学习。通常，这个值默认设置为10%，意味着模型应该主要从回答中学习，但也从提示中学习少量信息。

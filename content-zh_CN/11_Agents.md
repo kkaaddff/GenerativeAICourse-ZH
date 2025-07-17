@@ -1,168 +1,156 @@
-# AI Agents
+# AI智能体 (AI Agents)
 
-## Overview: From Manual to Autonomous
+## 概述：从手动到自主
 
-Most software today requires humans to click through interfaces, or make decisions, or manually execute workflows.
+今天的大多数软件都需要人类点击界面、做出决策或手动执行工作流程。想象一下客户服务团队手动审查退款请求的场景。
 
-Think of customer service teams manually reviewing refund requests.
+我们曾尝试用传统的自动化工具解决这个问题，但它们只适用于完全可预测的工作流程，因为其逻辑依赖于一系列固定的“如果-那么”（if-else）语句。然而，许多业务流程是复杂的、不可预测的，并且需要动态决策。
 
-We tried to solve this problem with traditional automation tools, but they only work on perfectly predictable workflows, as it relies on a series of if and else statements.
+很多人将AI智能体定义为“能够采取行动的LLM”。从历史上看，LLM的核心是**生成响应**，而智能体的核心是**执行任务**。
 
-A lot of business processes though, are complex, unpredictable, and require dynamic decision making.
+**但从第一性原理出发，AI智能体就是一个使用LLM作为其决策引擎，来独立执行行动的应用程序。** 关键词是**独立**——它不依赖于你告诉它具体怎么做。
 
-Many people define AI agents as LLMs that can take action. Historically, LLMs were about generating a response, agents are about doing.
+一个“退款审批AI智能体”就是一个能像所有应用程序一样采取行动（批准退款、转发给人工、执行退款等）的程序。唯一的区别是，做出这些决策的不是人，而是LLM。
 
-**But from first principles, an AI agent is simply an application that uses an LLM as its decision making engine to execute actions independently.** The key word is independently — it doesn't rely on you to take actions (telling it what to do).
+### 传统自动化 vs. AI智能体
 
-A refund approval AI agent is an application that can take actions (just like all applications) like approving a refund, forwarding it to a human, executing the refund, etc. The only difference is that it is not the human that makes these decisions, it is the LLM.
+你可以用传统自动化构建一个退款审批流程，其逻辑可能非常简单：
 
-### Traditional Automation vs. AI Agents
-
-You can build a refund approval process using traditional automation with simple logic such as:
 ```
-If amount > $500 AND no manager approval THEN reject
+如果 (金额 > 500元 且 无经理审批) 则 拒绝
 ```
 
-With an AI agent, it can review customer's purchase history, considers the reason for return, evaluates the company policy in context, then makes the decision. The agent can recognize workflow completion (refund is processed and customer is notified) and can self-correct (I sent the wrong refund amount, let me issue a correction).
+而一个AI智能体则能做得更多：它可以审查客户的购买历史，考虑退货原因，结合公司政策进行评估，然后做出决策。智能体还能识别工作流的完成状态（例如，退款已处理并已通知客户），甚至能自我纠正（例如，“我发现我退错了金额，让我来发布一个更正”）。
 
 ![image](https://github.com/user-attachments/assets/04699a4f-256b-4a74-9986-60e2b550094e)
 
+## AI智能体为何突然爆发？
 
-## Why AI Agents Suddenly Exploded
+1.  **决策能力的跃升：** 具备强大推理能力的模型的兴起，使AI智能体能够处理复杂的决策任务。
+2.  **通信协议的成熟：** 像MCP（我们将在下一个模块中详细介绍）这样的通信协议的出现，极大地简化了构建复杂智能体的过程。
 
-1. **Decision making capability:** The rise of reasoning models made AI agents capable of making complex decisions.
-2. **Communication protocols:** The rise of communication protocols like MCP (more on that in the next module) made the process of building complex agents a lot simpler.
+### 微软对智能体的定义与愿景
 
-### Microsoft's Agent Definition and Vision
+在微软，我们将智能体定义为**一个人类可以委托任务的系统，并且这些任务的复杂性会随着时间的推移而不断增加**。这一定义是我们构建产品和客户能力的参考框架。
 
-The way we define agents at Microsoft, and what we use as our frame of reference to build products and capabilities for customers, is **a system that humans can delegate tasks to, and these tasks will only become more complex over time**.
+由于推理能力的增强，智能体现在能够执行日益复杂的任务，尤其是在软件工程等领域。
 
-**Reasoning:** Because of the rise of reasoning models, agents are now able to do increasingly complex tasks, especially software engineering.
+### 智能体网络 (The Agentic Web)
 
-### The Agentic Web
+**运行时组件：**
+-   **推理层 (Reasoning Layer):** 决定采取何种行动的核心决策能力。
+-   **记忆 (Memory):** 这是基础软件工程。我们已经探讨了像RAG和长上下文窗口这样的解决方案，并且还有像“会话智能体”（Talk agents）这样的持续发展。目标是让智能体记住交互，并能像上次一样解决问题——就像你期望一个你委托任务的人类助手那样。
+-   **工具 (Tools):** 智能体在现实世界中采取行动的实际能力。
 
-**Runtime Components:**
-- **Reasoning layer:** The core decision-making capability that determines what actions to take
-- **Memory:** This is fundamental software engineering. We've explored solutions like RAG and long context windows, and there's ongoing development like Talk agents. The goal is to remember interactions and solve problems the same way it did last time — just like what you would expect from a human you delegate tasks to
-- **Tools:** The actual capabilities that allow agents to take actions in the world
+**协议：**
+-   **MCP (模型上下文协议):** 智能体需要采取行动，这意味着它们必须与其他系统通信。MCP就像是AI智能体的HTTP协议——它为智能体与不同服务和工具的交互提供了一种标准化的方式。
+-   **A2A (智能体到智能体):** 实现智能体之间协同工作的通信协议。
 
-**Protocols:** 
-- **MCP (Model Context Protocol):** You need agents to take actions, which means they have to communicate with other systems. MCP is like HTTP for AI agents — it provides a standardized way for agents to interact with different services and tools
-- **A2A (Agent-to-Agent):** Communication protocols that enable agents to work together
+## 何时应该构建AI智能体？
 
-## When to Build AI Agents
+### 1. 复杂的决策制定
+当工作流程需要无法用简单规则捕捉的判断力时。例如，一个传统系统可能会自动批准50美元以下的退款，但一个智能体可以评估一个45美元的退款请求，同时考虑到该客户本月已经退货3次。
 
-### 1. Complex Decision Making
-When workflows require judgement calls that can't be captured in rules. For instance, a traditional system might automatically approve refunds under $50, but an agent can evaluate a $45 refund request for a product the customer has returned 3 times before.
+### 2. 难以维护的规则系统
+如果你的规则系统已经膨胀到包含数百个条件语句，变得难以维护和扩展。
 
-### 2. Unmaintainable Rule System
-If your rule system has grown to hundreds of conditional statements.
+### 3. 非结构化数据工作流
+如果你需要处理文档、电子邮件或自然语言。例如，保险理赔智能体可以阅读事故报告、医疗记录等，这是传统解析方法无法做到的。
 
-### 3. Unstructured Data Workflows
-If you are processing documents, emails, or natural language. For instance, insurance claim agents can read accident reports, medical records, etc. Something impossible with traditional parsing.
+### 经济效益考量
+当然，智能体的单次操作成本可能高于传统自动化，但它们消除了复杂决策所需的人力劳动。如果你为人工审核案例支付每小时50美元，而一个智能体处理一个案例的成本是2美元，并且你每月处理1000个案例，那么你每月可以节省48,000美元（50,000美元的人工成本减去2,000美元的智能体成本）。
 
-### Economic Calculation
-Agents of course cost more per operation than traditional automation, but they eliminate the human labor required for complex decisions. If you're paying people $50/hour to review cases that an agent can handle for $2 per case, and you process 1000 cases monthly, you save $48,000 per month minus $2000 in agent costs.
+## 智能体的组成部分
 
-## Components of Agents
+### 1. 模型 (大脑)
+这是智能体的大脑。不同的模型具有不同的能力和成本。**最佳实践是：始终使用你所能获得的最强大的模型来构建原型**，以建立性能基线，设定评估指标（如准确率和任务完成率），然后在保持可接受结果的前提下，尝试用更小、更经济的模型替代。
 
-### 1. Model (The Brain)
-This is the brain. Different models have different capabilities and different costs. Always build your prototype with the most capable model to establish a performance baseline, set up evaluation metrics (accuracy and task completion rates), and replace with smaller models where acceptable results are maintained.
+通常，较大的模型用于复杂的决策点。例如，使用一个小型语言模型（SLM）进行简单的数据检索（获取客户订单历史），但使用一个大型语言模型（LLM）进行退款决策（我们是否应该批准这位本月已退货5次的客户的500美元退款请求？）。
 
-Usually, larger models are used for complex decision points. As an example, use an SLM for simple data retrieval (get customer order history) but an LLM for refund decisions (should we approve this $500 refund for a customer who's returned 5 items this month).
+### 2. 工具 (手脚)
+工具是智能体执行任务的“手脚”。它们可以是数据工具（如数据库查询）、通信工具（如发送电子邮件）、数据修改工具（如更新CRM记录），甚至是编排工具（如调用另一个智能体）。每个工具都需要在代码中有标准化的定义，包括清晰的参数和返回值。糟糕的工具文档会导致智能体误用API。
 
-### 2. Tools
-They could be data tools like database queries, they could be communication tools like sending emails or data modification (updating a CRM record), or could be orchestration tools like calling another agent. Each tool needs standardized definitions in your code with clear parameters and return values. Poor tool documentation causes agents to misuse APIs.
+**注意：** 你可能听说过“函数调用”（Function Calling）。它与“工具”的区别在于：**工具**是实际的实现（例如，执行工作的Python函数），而**函数调用**是LLM告诉你的应用程序“我需要使用天气查询功能”的能力。一个智能体两者都需要，但像Semantic Kernel这样的框架将函数调用抽象掉了，使它们看起来像是同一件事。
 
-**Note:** You might have heard terms like function calling. The difference between function calling and tools, is that tools are the actual implementation (like the python functions that do the work) while function calling is the LLM's ability to tell your app "I need access to the weather function". You need both in an agent, but Semantic Kernel abstracts away function calling so they can appear to be the same thing.
-
-**Example:**
+**示例：**
 ```python
-@function_tool
-def process_refund(customer_id: str, order_id: str, amount: float, reason: str):
+@kernel_function(description="处理客户订单的退款")
+def process_refund(customer_id: str, order_id: str, amount: float, reason: str) -> dict:
     """
-    Process a refund for a customer order.
+    处理客户订单的退款。
     
-    Args:
-        customer_id: Unique customer identifier
-        order_id: Order to refund
-        amount: Refund amount in dollars (must be <= original order total)
-        reason: Business reason for refund (required for accounting)
+    参数:
+        customer_id: 唯一的客户标识符
+        order_id: 需要退款的订单ID
+        amount: 退款金额（必须小于等于原始订单总额）
+        reason: 退款的业务原因（会计需要）
     
-    Returns:
-        {"success": bool, "refund_id": str, "message": str}
+    返回:
+        一个包含成功状态、退款ID和消息的字典
     """
-    # Implementation here
-    return {"success": True, "refund_id": "REF123", "message": "Refund processed"}
+    # 此处是具体的退款实现逻辑
+    return {"success": True, "refund_id": "REF123", "message": "退款已处理"}
 ```
 
-### 3. Instructions
-This defines how agent behaves, what it's allowed to do, and how it should handle edge cases. Instead of writing new procedures, adapt your current policies. If your customer service team follows a 12-step refund process, that becomes your agent's instruction set.
+### 3. 指令 (行为准则)
+指令定义了智能体的行为方式、它被允许做什么，以及如何处理边界情况。与其从头编写新的流程，不如**改编你现有的政策**。如果你的客服团队遵循一个12步的退款流程，那么这个流程就应该成为你的智能体的指令集。
 
-Capture edge cases as well like: What if customer provides partial information? What if the API call fails? What if the customer asks something outside your domain?
+同时，要明确边界情况的处理方式，例如：客户提供的信息不完整怎么办？API调用失败怎么办？客户问了一些超出你领域范围的问题怎么办？
 
-## Orchestrator
+## 编排器 (Orchestrator)
 
-Once you have an agent with a model, tools, and instructions, you need to orchestrate these workflows from start to finish. A single LLM can't handle multi-step processes that require checking conditions, calling multiple tools, and adapting based on results.
+一旦你有了一个包含模型、工具和指令的智能体，你就需要一个**编排器**来协调从开始到结束的整个工作流程。单个LLM无法处理需要检查条件、调用多个工具并根据结果进行调整的多步骤流程。
 
-### Single Agent Systems
-Easier to build, and typically relies on prompt templates, where instead of creating separate agents for different use cases, you use a single flexible prompt that accepts variables.
+### 单智能体系统
+构建起来相对简单，通常依赖于**提示模板**。即使用一个灵活的、接受变量的提示，而不是为不同的用例创建独立的智能体。
 
-### Multiple Agent Systems
-Used when complex logic is required and when the number of tools become large. There are two main patterns:
+### 多智能体系统
+当需要处理复杂的逻辑或工具数量变得庞大时，就需要使用多智能体系统。主要有两种模式：
 
-1. **Hub and Spoke:** A central manager agent coordinates specialized worker agents
-2. **Decentralized Pattern (Peer to Peer):** There is no central coordinator
+1.  **中心辐射型 (Hub and Spoke):** 一个中央“经理”智能体负责协调多个专业的“工人”智能体。
+2.  **去中心化模式 (Peer to Peer):** 没有中央协调器，智能体之间直接通信。
 
-The former is used when you need to synthesize the results from multiple agents or when you need one agent to maintain conversation context with a user.
+前者更常用于需要综合多个智能体的结果，或者需要一个智能体来维持与用户的对话上下文的场景。
 
-## Handling Memory
+## 处理记忆
 
-One of the biggest challenges in building production AI agents is managing memory. We already explored how we solve the problem of conversation memory, such as summarizing past conversations, or even using RAG for more long-term storage. Remember, LLMs are stateless — they don't remember anything between API calls as every request is independent.
+构建生产级AI智能体最大的挑战之一是**管理记忆**。我们已经探讨了如何解决**对话记忆**的问题，例如总结过去的对话，或使用RAG进行更长期的存储。请记住，LLM是**无状态的**——它们在两次API调用之间不记得任何事情，每个请求都是独立的。
 
-The other type of memory is **learning memory**. Ideally, we want the agent to learn from all past interactions so it becomes better. An example of how this is implemented is using RAG, so we store successful resolution examples and retrieve them for similar cases.
+另一种记忆是**学习记忆**。理想情况下，我们希望智能体能从所有过去的交互中学习，从而变得越来越好。实现这一点的一个例子是使用RAG，我们将成功的解决方案示例存储起来，并在遇到类似情况时进行检索。
 
-## Agentic RAG: Beyond Traditional Retrieval
+## 智能体RAG (Agentic RAG): 超越传统检索
 
-We already explored a traditional RAG system. The user sends the prompt, we check the vector store for data related to the prompt, that is combined with the prompt and sent to the LLM. LLM in this case literally just summarizes the answer, nothing more.
+我们已经探讨了传统的RAG系统：用户发送提示，我们从向量存储中检索相关数据，然后将数据和提示结合起来发送给LLM。在这种模式下，LLM的角色主要是**总结**我们提供的信息。
 
-But LLMs have much more capabilities than just summarizing the prompt & the relevant chunks retrieved from the vector store. **Agentic RAG** is a more sophisticated RAG implementation, where when the user asks a question, the agent analyzes the question, then decides the retrieval strategy (maybe I need to bring data from vector database 2 and 3), then reasons on top of the retrieved information, then retrieves more, until they get to the final answer. So it is a more sophisticated form of RAG.
+但LLM的能力远不止于此。**智能体RAG**是一种更复杂的RAG实现。当用户提问时，智能体首先会**分析问题**，然后**决定检索策略**（“我可能需要从向量数据库2和3中获取数据”），接着在检索到的信息之上进行**推理**，如果信息不足，它可能会**再次检索**，直到最终得出答案。这是一种更主动、更智能的RAG形式。
 
-## Guardrails
+## 护栏 (Guardrails)
 
-AI agents can take actions that affect real customers, they can access sensitive data, and they can represent your brand. Unlike chatbots that only generate text, agents need protection against dangerous output actions.
+AI智能体可以采取影响真实客户的行动，可以访问敏感数据，并且可以代表你的品牌。与只生成文本的聊天机器人不同，智能体需要有力的保护措施，以防止危险的输出和行动。
 
-You need a balance. Overly restrictive guardrails can block legitimate user requests. But the business reality is that a single leaked customer database or an unauthorized $10k refund can cost more than months of guardrail development.
+你需要找到一个平衡点。过于严格的护栏可能会阻止合法的用户请求。但商业现实是，一次客户数据库的泄露或一笔未经授权的1万美元退款，其损失可能超过数月护栏开发的成本。
 
-### Types of Guardrails
+### 护栏的类型
 
-1. **Relevance Classifier:** This keeps agents working within their intended scope. So it prevents customer service agents from answering random questions instead of solving customer problems. SLMs are typically used to classify the input relevance.
+1.  **相关性分类器:** 确保智能体在其预定范围内工作，防止客服智能体回答与客户问题无关的随机问题。通常使用小型语言模型（SLM）来对输入的相关性进行分类。
+2.  **安全分类器:** 检测提示注入和越狱企图。通常使用在提示注入模式上微调过的模型。
+3.  **PII过滤器:** 防止个人身份信息的意外泄露。
+4.  **内容审核过滤器:** 阻止有害内容，包括仇恨言论或骚扰。OpenAI等服务商提供了现成的内容审核API。
+5.  **人工介入 (Human in the Loop):** 对于低风险或中风险的任务（如发送邮件、更新客户记录），可能不需要人工干预。但对于高风险操作（如处理大额退款、取消订单），则需要人工批准。
+6.  **基于规则的保护:** 快速阻止已知的威胁，如SQL注入过滤器、输入长度限制、字符编码过滤器等。
+7.  **输出验证:** 确保智能体的响应符合品牌准则和业务政策，例如进行语气分析、政策合规性检查等。
 
-2. **Safety Classifier:** Detects prompt injection and jailbreak attempts. Typically, fine-tuned models trained on prompt injection patterns are used.
+### 构建护栏的策略
 
-3. **PII Filter:** Prevents accidental exposure of PII information.
+-   **第一阶段：** 专注于数据隐私和内容安全。这些是最高影响的风险，可能导致直接的业务损害。
+-   **第二阶段：** 基于现实世界的失败案例添加护栏。监控你部署的智能体，并为遇到的实际问题（如用户试图通过社交工程获取免费产品）实施护栏。
+-   **第三阶段：** 优化安全性和用户体验。减少阻止合法请求的误报，根据用户上下文（如VIP客户）定制护栏的敏感度。
 
-4. **Moderation Filter:** Blocks harmful content including hate speech or harassment. OpenAI has moderation APIs that can be used.
+### 人工干预
+护栏虽好，但目前的智能体仍然需要**人工介入**。即使是完全自主的智能体，你也需要有人类在旁待命，以备不时之需。这通常在超过预设的失败阈值或执行高风险操作时触发。
 
-5. **Human in the Loop:** For low or medium risk tasks (like sending emails, updating customer records) that might not need human intervention. Human approval can be used for high risk like processing refunds or cancelling orders.
+## 从零构建 vs. 使用“托管”智能体
 
-6. **Rule Based Protection:** This is to quickly block known threats. Like SQL injection filters, input length limit, character encoding filters (prevent unicode based attacks).
+你可以使用像Semantic Kernel这样的框架从零开始构建AI智能体，自己管理工具访问、内存等。或者，你也可以使用像**Azure AI Agent**这样的托管服务。它是在Azure上运行的基础设施，微软管理服务器、持久化存储（如文件存储、对话线程和向量数据库）、内置工具（如代码解释器），所有这些都在微软的安全环境中运行，并与AI Search、Azure Functions等企业服务集成。
 
-7. **Output Validation:** Ensure agent responses align with brand guidelines and business policies. Things like tone analysis, policy compliance, legal compliance, etc.
-
-### Strategy for Building Guardrails
-
-**Phase 1:** Focus on data privacy and content safety. These are highest impact risks that can cause immediate business damage (PII exposure, prompt injection, harmful content that damages brand image).
-
-**Phase 2:** Add guardrails based on real-world failures. Monitor your deployed agent and implement guardrails for actual problems encountered like user attempts to get free products through social engineering.
-
-**Phase 3:** Optimize for security and UX. Reduce false positives that block legitimate requests, customize guardrail sensitivity based on user context (VIP customers get different treatment).
-
-### Human Intervention
-Guardrails are great, but agents at the moment still need human in the loop. Even for fully autonomous agents, you need humans to be available just in case, and this is triggered when you exceed failure thresholds or for high-risk actions.
-
-## Building Agents from scratch vs using a "managed" Agent such as Azure AI Agent
-
-You can build AI agents using Semantic Kernel from scratch, where you manage things like tool access (you write the code yourself) or memory. Or you can use Azure AI Agent which is a managed service. It is infrastructure that runs on Azure. Microsoft manages the servers, persistent storage (things like file storage, conversation threads, and vector databases are managed server-side), built-in tools like code interpreter all running on Microsoft's secure environment, and enterprise integration to AI search, functions, etc.
-
-You can certainly use Semantic Kernel with standard LLM APIs but you need to manage conversation state management, tool execution & security, scaling, vector databases, etc. Azure AI Agent can handle all that for you but you may be concerned about higher costs or vendor lock-in. Of course, Semantic Kernel can be used to connect to Azure AI Agent service. 
+当然，你可以使用Semantic Kernel与标准的LLM API结合，但你需要自己管理对话状态、工具执行与安全、扩展性、向量数据库等。Azure AI Agent可以为你处理所有这些，但你可能会担心更高的成本或供应商锁定。当然，Semantic Kernel也可以用来连接到Azure AI Agent服务。

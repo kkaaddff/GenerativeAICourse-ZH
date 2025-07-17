@@ -1,83 +1,93 @@
-# Introduction to AI
+# 人工智能（AI）简介
 
-## What is AI?
+## 究竟什么是AI？
 
-Sometimes, when we hear the word too many times, we don't question what it actually means. What is AI? To explain that, let's go back in history.
+“AI”这个词我们听了太多遍，以至于可能都忘了去探究它的真正含义。到底什么是AI？要解释清楚，我们得先回顾一下历史。
 
-In the past, in order for computers to do something — show an Instagram post, allow us to buy a product on Amazon, calculate our taxes — we had to program the computer by giving it explicit instructions. So we as humans programmed the application step by step to solve these problems. What that means is, we solved the problem first as humans, and then gave these instructions to the computer.
+过去，要让计算机完成任务——无论是显示一条朋友圈，让我们在购物网站上买东西，还是计算税款——我们都必须通过编写明确的指令来“编程”。也就是说，我们人类首先要自己解决问题，然后把一步步的解法告诉计算机。
 
-With AI, instead of us solving the problem first, we teach the machine to solve the problem by giving it a bunch of different examples or data.
+而有了AI，情况就不同了。我们不再是先自己解决问题，而是通过给机器提供大量的范例或数据，来“教”会机器如何解决问题。
 
-A very basic example I always give: say we have an app that predicts house prices based on size. We can write that logic ourselves, say the house price is always the size times 3. But what if instead of us writing the formula, we showed the computer millions of examples or data points of house prices and sizes? The computer figures out from all these data points, "Oh, actually it's not just the size times 3, maybe it's size times 1.5." Even if you showed me as a human millions of examples of house prices and size, I will come up with a better formula than just guessing that the house price is equal to size times 3, but of course humans can't look at millions of examples.
+我经常举一个简单的例子：假设我们要开发一个根据房屋面积预测房价的应用。按照传统方式，我们可以自己写一个公式，比如 `房价 = 房屋面积 × 30000`。但如果换成AI的方式呢？我们不再自己编写公式，而是给计算机展示数百万个房屋面积和对应价格的数据点。计算机会从这些数据中自行寻找规律，它可能会发现：“哦，原来房价不只是面积乘以3万，可能更接近于面积乘以1.5万，并且还要考虑楼层、地段等其他因素。” 即使是人类专家，在看过数百万个案例后，也能提出比简单猜测更精准的公式，但问题是，人脑无法高效处理如此海量的数据。
 
-So AI is teaching the computer to learn from large datasets or examples. AI is excellent in cases where we want to look at data and solve problems. Let's take Instagram feed recommendation: without AI, we can let the human solve the problem (i.e., decide what to show you), or we can let AI see your browsing history, and based on that data, decide what to show you.
+所以，**AI的核心就是教会计算机从大规模数据或范例中学习**。在那些需要分析数据来解决问题的场景中，AI表现得异常出色。再以社交媒体的内容推荐为例：没有AI，我们可以让运营人员手动决定给你看什么内容；而有了AI，系统可以分析你的浏览历史，并基于这些数据，智能地为你推荐你可能感兴趣的内容。
 
-## AI Model
+## 什么是AI模型？
 
-I want to define what an AI model is. Because so far, we kept it at a high level — we said that AI is teaching computers to solve problems from large datasets.
+我想进一步明确“AI模型”的定义。到目前为止，我们只是宏观地讲，AI是教会计算机从大数据中解决问题。
 
-What happens behind the scenes? Purely math. And don't be scared of math, because a mathematical function is nothing more than something that takes an input and produces an output. There are functions that double the input, so if you input 2, you get 4 (y = 2x). Some functions reverse the input, so if you put in 2, you get -2 (y = -x). These are all mathematical functions.
+那么，这背后到底发生了什么？**纯粹是数学**。别被“数学”吓到，因为一个数学函数，无非就是接收一个输入，然后产生一个输出。比如，有的函数能将输入值翻倍，输入2，就输出4（y = 2x）；有的函数能将输入值取反，输入2，就输出-2（y = -x）。这些都是数学函数。
 
-If we go back to our example of a function that predicts house price based on its size: instead of us writing this mathematical function, we show the computer millions of examples of house prices based on their size and we let it come up with the mathematical formula itself.
+回到我们预测房价的例子：我们不再自己编写 `房价 = f(面积)` 这个数学函数，而是给计算机展示数百万个“房价”与“面积”的配对数据，让它自己找出这个数学公式。
 
-**That mathematical formula is the AI model.** So there is an AI model to predict house prices — that is a mathematical function to predict house prices. The input is house size, and output is house price. There is an AI model that puts the relevant content on your Instagram feed based on your browsing activities — that is another mathematical function trained specifically on Instagram browsing data. The input is browsing activities, the output is the Instagram post. But again, these are functions that computers came up with based on millions of data examples.
+**这个由计算机自己找到的数学公式，就是AI模型。**
 
-More precisely in practice, what happens is that humans choose the base mathematical function. So for example, we know that the house price is proportional to the size (the bigger the house, the more expensive it is), so we can model it using a linear function like (y = ax + b). Then the computer looks at all of the examples of input and output pairs (house prices and their size) then determines what the most appropriate values for a and b are (these are called **parameters**). Previously, we just guessed that the house price is 3 times its size (y = 3x + 0), but with AI, we let it look at multiple examples and come up with accurate values for a and b.
+所以：
+-   一个预测房价的AI模型，就是一个以房屋面积为输入、房价为输出的数学函数。
+-   一个为你的社交动态推荐内容的AI模型，是另一个以你的浏览行为为输入、推荐内容为输出的数学函数，它专门在海量的用户浏览数据上训练而成。
 
-## Types of AI
+这些函数不是由人预先写死的，而是计算机通过分析数百万个数据样本自己“悟”出来的。
 
-There are 3 primary methods of teaching the computer from a large subset of data:
+在实践中，过程会更精确一些：通常是人类先选择一个基础的函数形式。例如，我们知道房价和面积大致成正比（房子越大，通常越贵），所以我们可以选择一个线性函数 `y = ax + b` 作为基础模型。然后，计算机通过分析所有“房价-面积”的数据对，来确定 `a` 和 `b` 的最佳取值（这两个值被称为**参数**）。之前我们可能只是猜测 `a=3, b=0`，但有了AI，我们可以让它通过学习海量数据，找出最精准、最合适的 `a` 和 `b`。
 
-**Supervised Learning, Unsupervised Learning, and Reinforcement Learning.**
+## AI的主要类型
 
-### 1. Supervised Learning
+从大数据中“教”计算机学习，主要有三种方法：
 
-Supervised learning is the first and most common approach to train AI models. We teach the machine to solve problems by giving it a set of labeled data — not just any data, **labeled data**. Let's use the house size predictor as an example. To teach the computer, we give it a series of input/output pairs of house size and house price, all of that data is labeled. It says, "For this house size, this is the price," and we have millions of such data. The computer keeps trying different formulas, compares it with the set of labeled data until it arrives at the perfect formula. This is what we call training the AI or ML model — this is why it is expensive to train AI models because the computer keeps trying different formulas for millions of datasets. But now we have an AI model that predicts house prices based on size.
+**监督学习（Supervised Learning）、无监督学习（Unsupervised Learning）和强化学习（Reinforcement Learning）。**
 
-If we want to build an AI model, a mathematical function that can predict what picture is a dog or cat, we give it millions of labeled pictures of dogs and cats. It's all labeled, hence why it is called **supervised**. We as humans did the hard work of labeling the data, and hence are supervising the machine to learn from that data.
+### 1. 监督学习
+
+监督学习是训练AI模型最常见、最基础的方法。我们通过给机器提供一系列**带有标签的数据**来教它解决问题。注意，是“带有标签的”数据。
+
+以房价预测器为例，为了训练模型，我们提供给计算机一系列的“输入/输出”对，即“房屋面积”和对应的“房屋价格”。所有数据都是标记好的，比如：“对于这个面积，价格是这么多”。我们拥有数百万条这样的数据。计算机会不断尝试不同的公式，并将结果与这些带标签的数据进行比对，直到找到一个最完美的公式。这个过程就是我们所说的“训练”AI或机器学习模型——这也是为什么训练AI模型成本高昂的原因，因为它需要在海量数据集上不断进行尝试和修正。一旦训练完成，我们就拥有了一个能根据面积预测房价的AI模型。
+
+同理，如果我们想构建一个能识别猫和狗图片的AI模型（一个数学函数），我们就需要给它提供数百万张已经明确标好“这是猫”或“这是狗”的图片。因为所有数据都经过了人工标注，所以这种学习方式被称为**监督学习**。我们人类完成了标记数据的艰苦工作，从而像导师一样“监督”着机器从这些数据中学习。
 
 ![image](https://github.com/user-attachments/assets/4c1b4c17-b1f6-4070-b528-689c6b681668)
 
+### 2. 无监督学习
 
+无监督学习的数据则只有输入，没有预设的输出或标签。我们不再试图预测某个结果（比如一封邮件是否为垃圾邮件），而是单纯地在数据中**发现隐藏的模式或结构**。
 
-### 2. Unsupervised Learning
+购物数据是理解无监督学习最直观的例子。计算机可以从海量的购物记录中发现规律，并得出结论：购买面包的顾客通常也会购买牛奶。这些数据没有标签，仅仅是用户的购买行为记录，例如“顾客A买了鸡蛋，顾客B买了燕麦，顾客C买了牛奶”。模型从这些原始数据中自行发现了潜在的关联。
 
-Unsupervised learning is when the data only has inputs with no outputs. We are not trying to predict something like whether an email is spam; instead, we are simply discovering patterns in the data. Shopping data is the easiest example to think of. The computer can discover patterns from this massive data and conclude that customers who buy bread often buy milk. This data is not labeled or doesn't have outputs — it is simply buying behavior consisting of information like "this customer bought eggs, this bought oats, this bought milk," and from all that data, it discovers patterns.
+所以，两者的区别可以总结为：
+-   **监督学习**：“这里有房屋的面积和对应的价格，请学习如何根据面积预测价格。”
+-   **无监督学习**：“这里有所有的购物数据，请从中找出有趣的规律。”
 
-So supervised learning is: "Here's house size and price, learn to predict prices based on size." Unsupervised is: "Here's shopping data, find interesting patterns."
-
-On Amazon, product recommendations ("customers who bought x also bought y") is an example of an unsupervised ML model. The next time you're on Netflix, you are bombarded with unsupervised ML models telling you "people who watched this series also watched this."
+在电商网站上，“购买了X商品的顾客也购买了Y商品”这样的产品推荐，就是无监督学习模型的典型应用。下次你在视频网站上看到“观看此影片的用户也喜欢……”时，你就知道，你正被无-监督学习模型“包围”着。
 
 ![image](https://github.com/user-attachments/assets/c5538fab-6499-4179-be97-b74a1761fd0e)
 
+### 3. 强化学习
 
-### 3. Reinforcement Learning
+强化学习既不依赖有标签的数据，也不只是在无标签数据中寻找模式，而是通过**试错（Trial and Error）** 来学习。这个过程非常像训练宠物。当狗狗做对了某个动作，你就给它一点零食作为奖励。久而久之，狗狗就学会了哪些行为能带来奖励，哪些不能。
 
-Instead of learning from labeled data or finding patterns in unlabeled data, reinforcement learning is about learning through trial and error. It's literally like training a dog. When a dog does something good, you give it a treat. Over time, the dog learns which actions lead to treats and which don't.
+在强化学习中，AI模型（我们称之为“智能体”或Agent）会采取一系列行动，并根据这些行动的结果获得“奖励”或“惩罚”。例如，一个AI象棋程序就是通过强化学习训练的。它下了数百万盘棋，对于导致胜利的棋步，它会获得正向奖励；对于导致失败的棋步，则获得负向惩罚。经过长期训练，机器甚至能发现许多人类棋手从未考虑过的策略。
 
-In reinforcement learning, the ML model takes actions, and based on these actions, it receives rewards or penalties. As an example, an AI chess player uses reinforcement learning. It played millions of matches and received positive rewards for winning moves and negative rewards for losing moves. Over time, the machine discovers strategies that human players never considered. Self-driving vehicles is another example. A self-driving car gets rewards for staying in its lane, maintaining safe distances, and reaching its destination.
+自动驾驶是另一个例子。当自动驾驶汽车成功保持在车道内、维持安全车距或顺利到达目的地时，它就会获得奖励。
 
-When we talk about rewards, of course we're not giving the computer a treat. The reward is simply a numerical value that tells the algorithm whether an action was good or bad. So positive numbers indicate good actions, negative numbers indicate bad actions.
+当然，我们说的“奖励”，并不是真的给计算机一块糖。奖励只是一个数值，它告诉算法某个行为是好是坏。正数代表好的行为，负数代表坏的行为。
 
-With reinforcement learning, we're not giving the AI a dataset to study upfront. Instead, we're placing it in an environment (real or simulated) where it takes actions, results are observed, and it either gets a reward or penalty.
+通过强化学习，我们不是预先给AI一个数据集去研究，而是将它置于一个真实或模拟的环境中。它在这个环境中采取行动，观察结果，并根据结果获得奖励或惩罚，从而不断优化自己的行为策略。
 
-With AI models like ChatGPT, the model is trained using a supervised model where it is trained on millions of labeled data like books or websites. The model then uses reinforcement learning where it generates multiple possible responses to a given prompt, and these responses are rated based on how helpful or accurate they are either by humans or by another AI system. The model receives these ratings as rewards.
+像ChatGPT这样的大语言模型，其训练过程也融合了多种方法。它首先通过监督学习，在数百万计的带有标签的文本数据（如书籍、网站）上进行预训练。然后，它会利用强化学习进一步优化：模型针对一个给定的提示生成多个可能的回答，然后由人类评估员或另一个AI系统对这些回答的帮助性或准确性进行评分。模型将这些评分作为奖励信号，来学习如何生成更优质的回答。
 
 ![image](https://github.com/user-attachments/assets/d72c893d-1390-4583-8007-50aa0c6bf6d1)
 
+## AI为何在今天成为主流？
 
-## Why AI Became Mainstream
+你知道吗？AI的概念自20世纪50年代就已存在。问题是，为什么它直到最近才突然成为主流？我们早就有了谷歌翻译（这是AI），信用卡欺诈检测（这也是AI），社交媒体的内容推荐算法也存在已久。为什么AI现在才迎来爆发？
 
-Did you know that AI has been around since the 1950s? The question is, why did it suddenly become mainstream? We've had Google Translate for a long time, which is AI. We had fraud detection in credit cards, which is AI. We had Instagram feed algorithms for a long time. Why did it suddenly kick off?
+当然，像ChatGPT这样的产品的病毒式传播是原因之一，但更深层次的原因在于，AI的成功依赖于三大支柱的成熟：
 
-Sure, products like ChatGPT became viral, but here's the actual reason: In order for AI to work, you need 3 things:
+1.  **算法（Algorithms）**
+2.  **算力（Computers）**
+3.  **数据（Data）**
 
-1. **Algorithms**
-2. **Computers** 
-3. **Data**
+像OpenAI这样的公司所做的，是创造出**通用目的模型（General-Purpose Model）**，并将其开放给公众使用。这些模型对自然语言的理解能力达到了前所未有的高度。事实证明，能够深刻理解自然语言的模型具有极强的通用性，可以被用来解决各种日常问题，比如编写代码、提供客户支持等等。
 
-What companies like OpenAI did is they created a general-purpose model, exposed them to the public that anyone can use. And these models understood natural language really well, and it turns out that models that can understand natural language are general-purpose models, meaning they can be used to solve many everyday use cases like writing code, customer support, etc.
+在过去，你需要组建一支由机器学习工程师组成的庞大团队，并投入巨额资金购买庞大的计算基础设施，才能训练出属于你自己的AI模型。
 
-In the past, you had to train an army of machine learning engineers and invest in massive amounts of infrastructure to train your own AI model.
-
-So what happened now is, every company can now become an AI company.
+而现在，情况完全变了。**几乎每家公司都有机会成为一家AI公司**。

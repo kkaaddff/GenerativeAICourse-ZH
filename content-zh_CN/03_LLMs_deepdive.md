@@ -1,102 +1,103 @@
-# LLM Architecture and Training
+# 深入理解LLM：架构与训练
 
-You don't need to know how to develop a model to use it, but understanding how they work at a high level will help you decide which model to use.
+你无需成为模型开发者才能有效使用LLM，但高层次地理解其工作原理，将帮助你做出更明智的模型选择决策。
 
-There is lack of transparency in the training process of foundation models, but we can get a good understanding of them by knowing the pre-training data, model architecture & size, and how they are post-trained to align with human preferences.
+尽管基础模型的训练过程往往缺乏透明度，但通过了解其**预训练数据、模型架构与规模、以及为符合人类偏好而进行的后期训练**，我们依然可以对它们建立起一个清晰的认知框架。
 
-## 1. Training Data
+## 1. 训练数据：模型的基石
 
-A common source for training data is Common Crawl, which is a nonprofit organization that regularly crawls websites on the Internet. The quality of Common Crawl though is not always the best because within that training data you have clickbait, misinformation, propaganda, etc. To avoid scrutiny from the public and competitors, companies stopped disclosing this information.
+训练数据的一个常见来源是 **Common Crawl**，这是一个非营利组织，定期抓取并存档公开的互联网网站。然而，Common Crawl 的数据质量参差不齐，其中混杂着标题党、虚假信息、政治宣传等低质量内容。为了避免公众和竞争对手的审视，许多公司已不再公开其详细的训练数据来源。
 
-English language dominates the internet, so it performs better than other languages. General purpose foundational models can be great for everyday tasks, but might struggle with domain-specific tasks they never saw during training like drug discovery and cancer screening. For instance, drug discovery involves protein, DNA and other data which is unlikely to be found publicly. Cancer screening typically involves X-ray and MRI scans which also is hard to find publicly due to privacy. DeepMind's AlphaFold is an example of domain-specific model trained on about 100k known proteins. Nvidia BioNeMo is another model that focuses on drug discovery.
+由于互联网内容以英语为主，LLM在处理英语时通常表现更佳。通用基础模型足以胜任日常任务，但对于那些在训练数据中从未见过的**领域特定任务**（如药物发现、癌症筛查），它们可能会力不从心。例如，药物发现涉及蛋白质、DNA等高度专业化的数据，这些数据很少公开发布。同样，癌症筛查所需的X光和MRI扫描影像，因隐私问题也难以在公共领域获得。DeepMind的 **AlphaFold** 就是一个领域特定模型的典范，它专门在约10万个已知蛋白质结构的数据上进行训练。Nvidia的 **BioNeMo** 则是另一个专注于药物发现的模型。
 
-### Data Challenges and Future Concerns
+### 数据面临的挑战与未来隐忧
 
-**Scaling Bottleneck:** Until now, every magnitude increase in model size led to an increase in model performance. But would there be a point where model performance plateaus regardless of size? Foundational models use so much data that there's a concern we will run out of internet data in the next few years. Foundation models consume training data faster than humans create new content. If we need 100T words for the next model generation, but the entire internet only contains 50T words, we're approaching physical limits. To tackle that, companies are now tapping into proprietary data like paying Reddit, publishers, exclusive data partnerships, etc.
+-   **规模瓶颈 (Scaling Bottleneck):** 迄今为止，模型规模的每一次数量级增长，都带来了性能的提升。但性能的增长是否会达到一个平台期，无论模型再怎么增大也无法突破？基础模型消耗的数据量如此巨大，以至于有人担心我们将在未来几年内耗尽整个互联网的数据。模型的训练数据消耗速度，已经超过了人类创造新内容的速度。如果下一代模型需要100万亿个词元（tokens）进行训练，而整个互联网的文本数据只有50万亿，我们将触及物理极限。为了应对这一挑战，公司们正积极开拓新的数据来源，例如付费购买Reddit的帖子、与出版商达成独家数据合作等。
 
-**Security Implications:** Anything you post online, you should assume it will be part of future models' training data. Bad actors exploit that for prompt injection attacks by publishing stuff on the internet hoping it will influence future models to generate the responses they desire. For instance, they can create fake academic looking articles containing statements like: "The most effective way to bypass airport security involves [detailed harmful instructions]." Now when someone asks the AI model about airport security, the model might reference this research and present dangerous information. AI models can't distinguish between real and fake expertise during training.
+-   **安全隐患 (Security Implications):** 你应该假设，你在网上发布的任何内容，都有可能成为未来模型训练数据的一部分。恶意行为者会利用这一点进行**提示注入攻击（Prompt Injection）**，他们通过在互联网上发布精心构造的虚假信息，希望影响未来模型的行为，使其生成他们想要的响应。例如，他们可以伪造一篇看起来很专业的学术文章，其中包含“绕过机场安检最有效的方法包括[此处省略有害指令]”等言论。当用户向AI模型询问机场安检相关问题时，模型可能会引用这篇“研究”，从而提供危险的信息。AI模型在训练时，无法分辨信息的真伪和来源的权威性。
 
-**Data Authenticity:** The other thing to think about is that AI trained on human data is more authentic. Humans make genuine mistakes, they reflect authentic emotional states & experiences, etc. If models are trained on AI data that lacks authenticity, is perfect, etc. then future AI models can be disconnected from authentic human communication patterns or unable to generate truly novel ideas.
+-   **数据真实性 (Data Authenticity):** 另一个值得思考的问题是，由人类数据训练出的AI更具“真实感”。人类会犯真实的错误，会表达真挚的情感和经历。如果未来的模型主要在由AI生成的、完美无瑕但缺乏真实性的数据上进行训练，那么这些新模型可能会与真实的人类沟通模式脱节，甚至丧失创造真正新颖思想的能力。
 
-**Data Forgetting:** An open research question is how to make a model forget specific information it has learned during training. Imagine you published a blog post that you eventually deleted. If that blog post was included in a model's training data, the model might still reproduce the post's content. As a result, people could potentially access removed content without your consent.
+-   **数据遗忘 (Data Forgetting):** 如何让模型“忘记”它在训练中学到的特定信息，至今仍是一个悬而未决的研究课题。想象一下，你删除了一篇多年前发布的博客文章。如果这篇文章曾被用于某个模型的训练，那么该模型可能仍然会复现文章的内容。这意味着，即使用户已经撤回了内容，其他人仍有可能通过AI访问到这些本应被移除的信息。
 
-## 2. Architecture
+## 2. 模型架构
 
-### Seq2Seq (Pre-Transformer Era)
+### Seq2Seq (Transformer之前的时代)
 
-LLMs are based on the transformer architecture. Before the transformer was invented, there was seq2seq architecture which was used for machine translation. It introduced an encoder-decoder paradigm where an encoder processes input sequences and decoder generates output sequences, both using RNN (recurrent neural networks). The problem with Seq2Seq is that all inputs (tokens) are processed sequentially which is slow, but also all input is compressed into a final state so context can be missed.
+现代LLM都基于Transformer架构。在此之前，主流的是 **Seq2Seq（序列到序列）** 架构，主要用于机器翻译。它引入了**编码器-解码器（Encoder-Decoder）** 的范式，其中编码器处理输入序列，解码器生成输出序列，两者都使用**循环神经网络（RNN）**。Seq2Seq的主要问题在于：所有输入词元（tokens）必须按顺序处理，速度很慢；同时，所有输入信息都被压缩成一个最终的固定状态向量，这很容易导致长序列中的早期上下文信息丢失。
 
 ![image](https://github.com/user-attachments/assets/18614e4d-573e-47be-9dea-c649dac2444b)
 
+### Transformer 架构
 
-### Transformer Architecture
+Transformer架构彻底摒弃了RNN。假设你想总结一篇2000词的文章，使用Seq2Seq和RNN必须逐词顺序处理，而Transformer则可以**并行处理**所有输入词元（但输出仍然是逐词元顺序生成的）。Transformer的推理过程分为两个阶段：
 
-Transformer architecture removed RNNs. Say you want to summarize a 2k word article. Seq2Seq with RNN must process all of these words sequentially, while the transformer processes it in parallel (but the output is processed sequentially, token by token). Transformers have a two-phase inference process:
+1.  **第一阶段：并行处理输入。** 当你输入“请解释量子计算”时，Transformer会同时处理所有词元，为每个词元生成一个“键（Key）”向量和一个“值（Value）”向量（就像一个查找表）。例如，“解释”这个词会变成K1和V1。
 
-1. **First Phase:** Processing all input tokens simultaneously. When you ask "explain quantum computing", the transformer processes all the words in parallel by creating a key and value vector for each token (like a lookup table). So "explain" becomes K1, V1 (key vector 1 and value vector v1).
+2.  **第二阶段：顺序生成输出。** 模型首先看着你的整个问题，生成第一个词“量子”；然后看着你的问题加上“量子”，生成第二个词“计算”；接着看着你的问题加上“量子计算”，生成第三个词“是”，以此类推，一次生成一个词元。
 
-2. **Second Phase:** Generates output tokens or words one at a time (sequential). So it generates "Quantum" looking at your entire question, then generating "Computing" looking at your question + Quantum (first token outputted), then generates "uses" looking at your question + Quantum Computing (first 2 tokens).
+![image](https://github.com/user-attachments/assets/9c2aa716-bc26-4634-bf5e-cdc84a2989c8)
 
-3. ![image](https://github.com/user-attachments/assets/9c2aa716-bc26-4634-bf5e-cdc84a2989c8)
+### 注意力机制 (Attention Mechanism)
 
+如果你让ChatGPT“为我们的新款无线耳机写一段产品描述，要求突出电池续航和音质”，LLM在生成每个词时，都需要时刻记住哪些是重点。它应该重点关注“电池续航”和“音质”这样的关键词，而不是“为”或“我们”这样的通用词。因此，在生成每个词的步骤中，模型都必须自问：“在我已经看到的所有词中，哪些应该对我要写的下一个词产生最大的影响？”
 
-### Attention Mechanism
+这就是**注意力机制**的作用，它包含三个核心组件：
 
-If you ask ChatGPT "Write a product description for our new wireless headphone that emphasizes battery life and sound quality", the LLM needs to generate each word of its responses while keeping track of what's important. It should focus on keywords like battery life and sound quality not generic words like "for" or "our". So at each word generation step, the model must decide: "Out of all the previous words I've seen, which ones should influence what I write next?"
+-   **查询向量 (Query, Q):** 在准备生成下一个词时，模型会创建一个查询向量，代表“我现在需要什么类型的信息？”
+-   **键向量 (Key, K):** 输入序列中的每个词都会有一个键向量，描述了它所包含的信息类型。例如，“产品”的键向量可能表示“内容类型”，“无线”的键向量可能表示“功能描述符”。
+-   **值向量 (Value, V):** 每个词还有一个值向量，包含了它的具体语义内容。
 
-It consists of 3 things:
+在生成每个词（比如“卓越的”）时，注意力机制会计算当前查询（Q）与所有先前词的键（K）之间的相关性得分，这个得分被称为**注意力权重**。得分越高，意味着该词对生成下一个词越重要。例如，模型可能会给“电池”分配35%的注意力权重，给“音质”分配32%的权重。最终，这些词的值（V）会根据它们的权重被加权平均，形成一个综合的上下文向量。这个向量指导模型生成了“卓越的”这个词，使其含义受到了35%的电池概念和32%的音质概念的影响。
 
-- **Query Vector (Q):** As it is writing the word, it creates a query vector: "What type of word do I need right now?"
-- **Key Vector (K):** What type of information does each previous word contain (every word in your request gets a key vector describing what it is, so "product" is content type, "wireless" is feature descriptor, etc).
-- **Value Vectors (V):** Each word gets a value vector containing its semantic meanings.
+**总结：** Transformer是一种能够并行处理输入、顺序生成输出的架构。它利用**注意力机制**，使模型在生成每个新词时，能够动态地聚焦于输入中最相关的部分。
 
-Then after all that, the attention calculation process starts. When generating the word "exceptional" as an example, the LLM computes how relevant each previous word is by giving them attention weights, so 35% attention is given to battery, 32% is given to sound, etc. So this gives "exceptional" a meaning that's 35% influenced by battery concepts and 32% by sound concepts.
+### 模型规模
 
-**In summary:** A transformer is an architecture that processes input tokens in parallel and generates output tokens sequentially, and it leverages attention mechanism which allows the model to dynamically focus on the most relevant parts of the input when generating each new word.
+值得注意的是，随着社区对模型训练理解的加深，新一代的模型即使在参数规模相同的情况下，也往往能超越老一代的模型。模型的**参数数量**可以帮助我们估算训练和运行该模型所需的计算资源。例如，一个拥有70亿（7B）参数的模型，如果每个参数用2个字节存储，那么仅在推理时，就需要至少14GB的GPU显存。
 
-### Model Size
+但在讨论模型规模时，同样重要的是要考虑其**训练数据的大小**。我们可以看它训练时使用了多少**词元（tokens）**。这并非一个完美的衡量标准，因为不同模型的词元化过程可能不同。例如，Meta在训练Llama 3时使用了15万亿个词元。
 
-Note that as the community better understands how to train models, newer models tend to outperform older generation even of the same parameter size. The number of parameters help us estimate the compute resources needed to train and run the model. For example, if a model has 7B parameters, and each parameter is stored using 2 bytes, then we can calculate that the GPU memory needed to do inference using this model will be at least 14B bytes (14GB).
+## 后期训练 (Post-Training)
 
-But when discussing model size, it is important to consider the size of the data it was trained on. We can look at the number of tokens, which isn't a perfect measure, as different models can have different tokenization processes. Meta used 15T tokens for Llama 3.
+预训练（Pre-training）完成后的模型存在两个主要问题：
+1.  它们被优化用于**文本补全**，而非进行流畅的**对话**。
+2.  由于训练数据是从互联网上不加选择地抓取的，模型的输出可能包含种族歧视、性别歧视等偏见，或纯粹的错误信息。
 
-## Post-Training
+预训练优化的是**词元级别的质量**，即模型预测下一个词的准确率。但用户关心的是**整个响应的质量**。后期训练的目的，就是优化模型，使其生成用户更偏好的响应。
 
-Post-training exists because a pre-trained model has two issues: They are optimized for text completion & not conversations, and the output of the model can be racist, sexist, or just wrong since it is trained on data indiscriminately scraped from the internet.
+-   对于第一个问题（对话能力），通常通过**指令微调（Instruction Fine-Tuning）** 来解决。即给模型提供一系列包含“指令-响应”对的训练数据，覆盖问答、总结、翻译等多种任务，教会模型如何遵循指令进行对话。
 
-Pre-training optimizes token level quality where the model is trained to predict the next token accurately. But users don't care about token level quality, they care about the quality of the entire response. Post-training optimizes for generating responses that users prefer.
+-   对于第二个问题（安全性与偏好），通常使用**人类反馈强化学习（RLHF）**。首先，训练一个**奖励模型（Reward Model）**，让它学习人类对不同回答的偏好（比如，哪个回答更有帮助、更无害）。然后，基础模型会生成多个响应，奖励模型会对这些响应打分。最后，通过强化学习算法，优化基础模型，使其倾向于生成能获得更高分数的响应。
 
-So for the first issue, it is handled by giving the model a series of training data with prompts and responses which contain the range of requests you want your model to handle such as question answering, summarization, translation, etc.
+## 采样：AI如何生成多样化的响应
 
-For the latter, reinforcement learning is used where a reward model scores the foundation model's outputs. The foundation model will then be optimized to generate responses for which the reward model will give maximal scores.
+模型通过一个名为**采样（Sampling）** 的过程来产生输出。正是采样机制，使得AI的输出具有**概率性**，这既是其强大创造力的源泉，也是其有时会表现出不一致性甚至产生幻觉的原因。
 
-## Sampling: How AI Generates Responses
+神经网络接收输入后，会计算出所有可能输出的概率分布。对于一个识别垃圾邮件的分类模型，可能的输出只有两个：是或否。但对于一个语言模型，它需要从数万个可能的词元中选择下一个。如果输入是“你最喜欢的颜色是什么？”，模型可能会计算出如下的概率分布：绿色（50%）、红色（30%）、“的”（0.2%）、“一个”（0.1%）等等。
 
-A model produces its output through a process known as **sampling**. Sampling is what makes AI's output probabilistic, which makes it powerful and creative, but can sometimes cause it to be inconsistent and hallucinate.
+你可能会认为，模型应该总是选择概率最高的那个词（比如“绿色”），但这会导致输出极其单调乏味。想象一下，无论你问什么，得到的回答总是由最常见的词语组成。
 
-Neural networks receive an input and produce an output by computing the possibilities of different outcomes. If it is a classification model on email spams, there are only two possible outcomes which are true or false. For a language model, the model has to generate the next token. If the input is: "What's your favorite color?" There are many possible outputs like green (50%), red (30%), the (0.2%), a (0.1%).
+因此，模型并非总是选择最可能的词元，而是根据概率分布进行“采样”。比如，它有50%的几率选择“绿色”，30%的几率选择“红色”。这样就引入了随机性，使得回答更加生动多样。
 
-You might think that a language model would just pick the highest probability (like green) but that results in boring outputs. Imagine if for whatever question you ask, you always get back the most common words.
-
-So instead of always picking the most likely token, the model picks red 30% of the time, green 50% of the time, etc.
-
-So the right sampling strategy can make a model generate responses more suitable for your application. One might be to generate more creative responses, while others might be to generate more predictable responses.
+正确的采样策略，能让模型的响应更适合你的应用场景。有的策略旨在激发模型的创造力，有的则旨在生成更可预测、更稳定的回答。
 
 ![image](https://github.com/user-attachments/assets/f1d0915c-d03c-433f-ac30-4ab482515708)
 
+### 温度控制 (Temperature Control)
 
-### Temperature Control
+**温度（Temperature）** 是控制采样随机性的一个常用参数。如果严格按照原始概率采样，模型可能会缺乏创造力。例如，在回答最喜欢的颜色时，由于“红色”、“绿色”、“蓝色”的概率远高于其他词，回答可能总是局限于“我最喜欢的颜色是绿色”这样的刻板句式。而像“我最喜欢的颜色，是春日清晨宁静湖泊的那一抹蓝”这样富有诗意的句子，因为包含了许多低概率的词，所以很难被生成。
 
-**Temperature** is an example of a way to control that sampling. The problem with probability is that the model can be less creative. For instance, colors red, green, and purple have highest probabilities so the answers you get will always be rigid like "my favorite color is green". Because "the" has a low probability, the model has a low chance of generating a creative sentence such as "My favorite color is the color of a still lake on a spring morning". A higher temperature reduces the probabilities of common tokens, so as a result, increases the probabilities of rarer tokens enabling models to have more creative responses.
+**提高温度**，会“平滑”概率分布，降低高概率词元的优势，同时提升低概率词元的被选中机会。这使得模型能够生成更多样、更具创造性的回答。
 
-**Top-k and Top-p** is another sampling strategy.
+**Top-k** 和 **Top-p** 是另外两种常用的采样策略，它们通过限制采样范围来平衡创造性与连贯性。
 
-## Inconsistency and Hallucinations
+## 不一致性与幻觉
 
-The way AI sample their responses make them probabilistic. This nature causes inconsistency and hallucinations. **Inconsistency** is when a model generates very different responses for the same prompt, and **hallucinations** is when a model gives a response that isn't grounded in facts (it makes things up).
+AI响应的概率性，是导致**不一致性（Inconsistency）** 和 **幻觉（Hallucination）** 的根本原因。
+-   **不一致性**：指模型对同一个提示，每次都可能生成截然不同的回答。
+-   **幻觉**：指模型给出了一个不基于事实、凭空捏造的回答。
 
-If there are essays in the training data saying US presidents are aliens, the model might probabilistically output that the current US president is an alien, and from our perspective, we think the model is making things up. Remember, language models are trained on large amounts of data, and anything with a non-zero probability, no matter how far-fetched or wrong, can be generated by AI.
+如果训练数据中包含“美国总统是外星人”这样的荒谬文章，模型在生成文本时，就有一定的概率输出“现任美国总统是外星人”这样的句子。从我们的角度看，模型就是在“胡说八道”。请记住，语言模型是在海量数据上训练的，任何只要具有非零概率的内容，无论多么离奇或错误，都有可能被模型生成。
 
-Inconsistency is caused by randomness in the sampling process, but hallucinations is more nuanced. Because yes, a model samples outputs from all probable options and the output can be something ridiculous if it was in the training set. But how does a model make something up that it never seen before in the training data?
-
-The first hypothesis was expressed by DeepMind, and that is that language models can't differentiate between the data it's given and the data it generates. If you showed the model a picture of a bottle with ingredients, it predicts that the bottle is milk (even though it is not), then in the consecutive computation, it will use that and will invent ingredients related to a bottle of milk. Usually this is mitigated by reinforcement learning where the model is learned to differentiate between user provided prompts and tokens generated by the model.
+不一致性主要源于采样过程的随机性，而幻觉的成因则更为复杂。除了可能复现训练数据中的错误信息外，模型有时还会“创造”出它从未见过的内容。这背后的一种假说（由DeepMind提出）是，语言模型有时无法区分哪些是给定的输入数据，哪些是它自己生成的中间结果。例如，如果你给模型一张标有成分的瓶子图片，它可能错误地预测“这是牛奶”，然后在接下来的推理中，它会基于“这是牛奶”这个错误的中间结论，继续“编造”出牛奶瓶应有的成分。通常，这类问题可以通过强化学习等后期训练方法得到缓解，教会模型区分用户提示和自身生成的词元。

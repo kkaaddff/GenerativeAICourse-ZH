@@ -1,57 +1,57 @@
-# How LLMs Work
+# 大语言模型（LLM）工作原理
 
-We're going to get more technical as we move on, but still within the spirit of sticking to first principles.
+随着课程的深入，我们将探讨更多技术细节，但始终会坚守第一性原理，力求通俗易懂。
 
-## The Core Mechanism: Next Word Prediction
+## 核心机制：预测下一个词
 
-We all used tools like ChatGPT — how do these actually work behind the scenes? A large language model takes a series of text input like "The cat sat on" and literally predicts what the next word is. It predicts that "the" is 70% likely, "a" is 20% likely, "my" is 10% likely, so it picks "the". It becomes "the cat sat on the". Then predicts the next word, which is "mat" as most likely. Each new word is based on all previous words, like a sophisticated auto-complete.
+我们都用过像ChatGPT这样的工具，但它们背后究竟是如何工作的呢？简单来说，一个大语言模型（LLM）接收一段文本输入，比如“猫坐在”，然后做的就是**预测下一个最有可能出现的词**。它可能会计算出“地毯上”的概率是70%，“沙发上”是20%，“我腿上”是10%，于是它选择了概率最高的“地毯上”。这样，文本就变成了“猫坐在地毯上”。接着，它会基于这个新的序列，继续预测下一个词，比如“打盹”。每一个新词的生成，都依赖于前面所有的词，就像一个极其复杂的“自动补全”工具。
 
 ![image](https://github.com/user-attachments/assets/9331a11c-f988-4099-bb76-ecc77fd835c4)
 
+所以，当你问ChatGPT：“法国的首都是哪里？”，它会分析“法国的”“首都”“是”这几个词，然后预测出下一个最合理的词是“巴黎”。模型本质上只是在根据它从海量文本数据中学到的模式，来预测最有可能的下一个词。它之所以能做得这么好，正是因为它“阅读”了近乎整个互联网的文本。
 
-So if you ask ChatGPT, "What is the capital of France?", it looks at the series of words "the" "capital" "of" "France" then predicts "is" as logical next word, then "Paris". The model is literally just predicting likely next words based on patterns it learned. It does this well because it is trained on massive amounts of text.
+你可能会问：“我明白了，当我提问时，它会根据我的问题（一系列词语）来预测接下来的词。但当我让它写一篇文章时，它是如何生成大段文本的呢？”
 
-You might say, "OK, I get that when I ask ChatGPT a question, it takes my prompt or question, which is a series of words, and predicts what the next words are. How does it generate text, like write an essay, when I ask it to?"
+答案是：**文本生成就是不断重复地预测下一个词**。如果你给模型一个指令：“写一篇关于猫的文章”，它会首先看着这个指令，预测出第一个最有可能的词，比如“猫”，然后是“是”，接着是“一种”，再接着是“迷人”，如此循环，一次只生成一个词。它实际上是在逐字思考，每一次都选择最恰当的那个词。
 
-**Text generation is just repeated word prediction.** If you ask the model: "Write an essay about cats", it looks at the prompt "write an essay about cats" then it predicts the most likely word which is "cats" then "are" then "fascinating" and so on one word at a time. It is literally thinking one word at a time and picking the most appropriate word each time.
+## 数学基础
 
-## The Mathematical Foundation
+在房价预测的例子中，我们用 `f(x) = wx + b` 这个公式，并通过数据找到最合适的 `w` 和 `b`（参数）。在语言模型中，原理类似，但更复杂。每一个词或字符，都会被转换成一个由数字组成的列表（即向量），例如 `[0.2, -0.5, 0.8]`。这个数字列表被称为**词嵌入（Embeddings）**。每个词都被一个独特的向量所代表，这个向量捕捉了该词的意义、情感、语法功能等多种特征。
 
-With house prices, f(x) = wx + b, we find w and b values that work best (parameters). With language models, each word becomes a list of numbers like [0.2, -0.5, 0.8], and these numbers, for each word, are known as **embeddings**. Each word is represented by a series of numbers capturing meaning, sentiment, etc.
+比如，“猫”可能变成 `[0.2, -0.5, 0.8]`，“坐”可能变成 `[0.3, 0.6, -0.2]`。这样，每个词都被一系列数字精确地描述。LLM模型接收这些数字（词嵌入）作为输入，通过一个拥有数十亿甚至数万亿参数的复杂数学函数（基于神经网络），最终输出对下一个词的预测。
 
-So "cat" becomes [0.2, -0.5, 0.8], "sat" becomes [0.3, 0.6, -0.2]. Cool, each word is represented by a series of numbers capturing different features of the word. The LLM model takes these numbers (embeddings) as input, uses a complex mathematical function (based on neural network) with billions of parameters and the output is a next word prediction.
+这个庞大数学函数中的海量参数，编码了语法规则、词语搭配、事实知识、推理逻辑等无数细节。正因如此，当你输入一个句子时，模型能够凭借这些参数，准确地预测出下一个最应该出现的词。
 
-These parameters or variables in a mathematical function capture so many things like grammar rules, which sequence of words makes sense, how to combine words. This is why when you throw a sentence into the model, the model has billions of parameters that are able to predict what the next word is.
+## 训练过程：自监督学习的革命
 
-## Training Process: Self-Supervision
+模型中那数十亿计的参数，正是在训练过程中通过不断调整，才得以做出越来越精准的词语预测。训练过程大致如下：你给模型展示海量的文本，它从随机的参数值开始，进行预测，然后根据预测的准确性，反过来微调参数，以期下次能做得更好。
 
-The billions of parameters in this function are what gets adjusted during training to make better word predictions. So you show the model a lot of text, you start with random parameter values, model makes prediction, adjusts parameters to improve predictions.
+在实践中，我们用数百万乃至数十亿的句子来训练模型。例如，对于句子“猫坐在垫子上”，我们先给模型看“猫坐在垫子”，然后让它预测下一个词。我们知道正确答案是“上”，如果模型预测错误（比如预测了“里”），我们就会调整参数，直到它能正确预测出“上”。然后，我们再用下一个句子，比如“法国的首都是”，继续调整参数，直到它能预测出“巴黎”。
 
-What happens in practice: you literally train the model on millions of sentences or text examples. Starting with: "The cat sat on the mat", we show the model "The cat sat on the", we know the correct answer is "The cat sat on the mat" and we adjust parameters until it predicts the word "mat". If it predicts the word "box", that is wrong, so we keep adjusting parameters. Then we move on to next sentence "Paris the capital", we change parameter values until it comes up with the word "of" as the next prediction.
+### 自监督学习：为何它如此具有革命性？
 
-### Self-Supervision: Why This is Revolutionary
+传统的监督学习（使用人工标注好的数据进行训练）成本极高。假设人工标注一张图片需要5分钱，那么标注一百万张图片就需要5万元，这种方式难以规模化。而语言模型采用了一种名为**自监督学习（Self-Supervision）** 的巧妙方法。
 
-Supervised machine learning (ML algorithms trained using labeled data) is expensive — if it costs 5 cents for one person to label one image, it would cost 50k to label a million images — and often not scalable. Language models use **self-supervision**. Say you train the model with the sentence "The cat sat on the mat", the model sees "The cat sat on the" and predicts "mat", so the original sentence itself provides the correct answer. So no human labeling is required.
+在“猫坐在垫子上”这个例子中，模型看到“猫坐在垫子”，需要预测“上”。正确答案“上”本身就包含在原始句子中。这意味着，**文本本身既是训练数据，也提供了标签**，完全不需要人工干预。
 
-So self-supervised learning means language models can learn from text sequences without requiring any labeling. Since text sequences are everywhere (books, blog posts, articles, etc), there is massive amount of training data allowing models to scale up to become LLMs.
+因此，自监督学习让语言模型能够直接从任何文本序列中学习，无需任何额外的人工标注。书籍、博客、新闻文章、代码……互联网上的一切文本都成了它的训练素材。这使得模型能够利用海量的、几乎无限的数据进行训练，最终成长为我们今天所知的“大”语言模型。
 
-Think about how many sentences we have — this is why the training is rigorous. Billions of parameters to adjust, millions of examples to learn from, takes weeks or months to train. Once we find parameters that can capture patterns from all examples, we are confident that the model can predict likely next words.
+想象一下我们拥有的句子数量是多么庞大——这就是为什么训练过程如此严苛。数十亿的参数需要调整，数万亿的样本需要学习，整个过程可能需要数周甚至数月才能完成。一旦我们找到了能够捕捉所有这些文本数据中规律的参数组合，我们就得到了一个强大的模型，能够自信地预测任何文本序列的下一个词。
 
-Once we find values for these parameters, we're good — we can input any word, and we can easily predict the next word.
+## 令牌（Tokens）
 
-## Tokens
-
-These words that are transformed to numbers are known as **tokens**. Whenever you use LLMs hosted by other companies, you are paying per tokens.
+在模型内部，这些被转换成数字的“词”，在技术上被称为**令牌（Tokens）**。一个令牌通常可以是一个词，也可以是一个词的一部分（比如 `un-happi-ness`）。当你使用由商业公司托管的LLM服务时，通常是按照你输入和模型输出的令牌数量来计费的。
 
 ![image](https://github.com/user-attachments/assets/7a7bd7e9-4134-4480-a22c-a71cc3872277)
 
+## Transformer架构
 
-## Transformer Architecture
+2017年，谷歌发布了一篇名为《Attention is All You Need》的论文，其中提出的**Transformer架构**是现代LLM的基石。有趣的是，该论文的作者们当时可能并未完全预见到他们所发明的架构将带来如此巨大的突破。在此之后，OpenAI于2018年发布了GPT-1，2019年发布了GPT-2，2020年发布了GPT-3。最终在2022年，结合了GPT-3和人类反馈强化学习的ChatGPT问世，引爆了全球范围内的AI热潮。
 
-In 2017, Google released a paper called "Attention is All You Need." Transformer architecture was invented in this paper. The inventors themselves did not realize the breakthrough they made. In 2018, GPT-1 was released, then GPT-2 in 2019, GPT-3 in 2020, and then in 2022 ChatGPT was released leveraging GPT-3 in combination with reinforcement learning from human feedback.
+OpenAI的第一个GPT模型拥有1.17亿个参数，而如今的模型参数量已达到万亿级别。
 
-OpenAI's first GPT model had 117M parameters, now it is trillions.
+## 为何大语言模型是“通用”的？
 
-## Why Large Language Models Are General Purpose
+得益于其巨大的规模和在海量多样化数据上的训练，大语言模型获得了强大的**通用能力**，能够处理广泛的任务。以往的AI模型通常是“专才”，比如一个模型专门用于情感分析，另一个专门用于机器翻译。而如今的LLM，两者都能胜任，甚至能做得更多。
 
-Language models, thanks to their scale, are capable of a wide range of tasks. Previous models were specific to specific tasks like sentiment analysis or translation (language models can do both). If you're a retailer and want to generate product descriptions, you can use a model that generates accurate descriptions but might fail to capture the brand's voice or messaging. With language models, you can craft detailed instructions with examples of desired product descriptions, you can ground it in specific data or even fine-tune it.
+例如，如果你是一家零售商，想要为商品生成描述。一个专门的、小型的文本生成模型或许能生成准确的描述，但可能无法捕捉到你品牌的独特“声音”或营销风格。而对于一个大型语言模型，你可以通过精心设计的指令（Prompt），提供详细的要求和几个范例，甚至可以基于你自己的数据对它进行微调，从而让它生成完全符合你品牌风格的、高质量的商品描述。
