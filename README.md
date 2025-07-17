@@ -1,6 +1,7 @@
 <p align="left">
     <a href="README-zh_CN.md">中文</a>
 </p>
+
 # Generative AI Course
 
 This is the most comprehensive Generative AI course you'll come across.
